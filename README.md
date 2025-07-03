@@ -1,4 +1,3 @@
-
 -----
 
 # Custom S3/MinIO Connector for OpenMetadata
@@ -163,3 +162,68 @@ For any questions or inquiries, please contact me:
 * **Email**: `mfonsau@talentys.eu`
 
 * **LinkedIn**: `https://www.linkedin.com/in/mustapha-fonsau/`
+
+-----
+
+## Version Control & Git Usage
+
+This project is git-ready. To start tracking your code and configuration changes:
+
+```powershell
+# Initialize a new git repository (run in your project root)
+git init
+# Add all files
+git add .
+# Commit your initial project state
+git commit -m "Initial commit: add OpenMetadata S3 connector and configs"
+```
+
+(Optional) To connect to a remote repository:
+```powershell
+git remote add origin https://github.com/your-username/your-repo.git
+git push -u origin master
+```
+
+### Recommended `.gitignore`
+Create a `.gitignore` file in your project root with:
+
+```
+# Python
+__pycache__/
+*.pyc
+.env
+*.env
+*.log
+# Jupyter
+.ipynb_checkpoints/
+# OS
+.DS_Store
+Thumbs.db
+# OpenMetadata
+openmetadata-logs/
+```
+
+**Never commit real credentials or JWT tokens to git.** Use `.env` files and add them to `.gitignore`.
+
+-----
+
+## Playbook & Token Management
+
+- The main workflow config is in `playbooks/ingestion.yaml`.
+- Update the `jwtToken` field with a valid token for your OpenMetadata instance.
+- If you change credentials or tokens, restart your ingestion process.
+
+-----
+
+## Troubleshooting JWT Token Errors
+
+If you see errors like:
+
+```
+Not Authorized! Token verification failed. Public key mismatch. due to com.auth0.jwt.exceptions.SignatureVerificationException
+```
+
+- Ensure your JWT token is generated for your current OpenMetadata server and is not expired.
+- See the main project documentation or ask your admin for a valid token.
+
+-----
