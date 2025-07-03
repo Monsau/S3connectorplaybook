@@ -1,0 +1,6 @@
+pip install --upgrade pip setuptools
+pip install "openmetadata-ingestion==xxx"
+pip install google-cloud-bigquery
+pip install pandas
+pip install importlib-metadata
+pip install -e .

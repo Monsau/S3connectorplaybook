@@ -1,0 +1,6 @@
+openmetadata-ingestion==1.8.0
+pandas
+importlib-metadata
+pyarrow
+boto3
+pyyaml
