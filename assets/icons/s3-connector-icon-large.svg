@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle with Gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9900"/>
+      <stop offset="100%" style="stop-color:#FF6600"/>
+    </linearGradient>
+    <linearGradient id="bucketGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#F5F5F5"/>
+    </linearGradient>
+    <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#232F3E" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <circle cx="64" cy="64" r="60" fill="url(#bgGradient)" stroke="#232F3E" stroke-width="4" filter="url(#shadow)"/>
+  
+  <!-- S3 Bucket Icon (Detailed) -->
+  <g transform="translate(32, 32)">
+    <!-- Main Bucket Body -->
+    <path d="M8 24 L56 24 L56 56 L8 56 Z" fill="url(#bucketGradient)" stroke="#232F3E" stroke-width="3"/>
+    
+    <!-- Bucket Top (Ellipse) -->
+    <ellipse cx="32" cy="24" rx="24" ry="8" fill="#F8F8F8" stroke="#232F3E" stroke-width="3"/>
+    
+    <!-- Bucket Bottom (Ellipse) -->
+    <ellipse cx="32" cy="56" rx="24" ry="8" fill="#E8E8E8" stroke="#232F3E" stroke-width="3"/>
+    
+    <!-- S3 Text -->
+    <text x="32" y="44" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#232F3E">S3</text>
+    
+    <!-- Small storage indicators -->
+    <rect x="12" y="30" width="4" height="4" fill="#4CAF50" rx="1"/>
+    <rect x="20" y="30" width="4" height="4" fill="#2196F3" rx="1"/>
+    <rect x="28" y="30" width="4" height="4" fill="#FF5722" rx="1"/>
+    <rect x="36" y="30" width="4" height="4" fill="#9C27B0" rx="1"/>
+    <rect x="44" y="30" width="4" height="4" fill="#FF9800" rx="1"/>
+    <rect x="48" y="30" width="4" height="4" fill="#00BCD4" rx="1"/>
+  </g>
+  
+  <!-- Data Flow Lines -->
+  <g stroke="#FFE0B3" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M16 64 L32 64" stroke-dasharray="4,4"/>
+    <path d="M96 64 L112 64" stroke-dasharray="4,4"/>
+    <path d="M64 16 L64 32" stroke-dasharray="4,4"/>
+    <path d="M64 96 L64 112" stroke-dasharray="4,4"/>
+  </g>
+  
+  <!-- Corner metadata indicators -->
+  <circle cx="24" cy="24" r="4" fill="#4CAF50" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="104" cy="24" r="4" fill="#2196F3" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="24" cy="104" r="4" fill="#FF5722" stroke="#FFFFFF" stroke-width="2"/>
+  <circle cx="104" cy="104" r="4" fill="#9C27B0" stroke="#FFFFFF" stroke-width="2"/>
+  
+  <!-- Connector label -->
+  <text x="64" y="120" font-family="Arial, sans-serif" font-size="8" font-weight="600" text-anchor="middle" fill="#232F3E">CONNECTOR</text>
+</svg>

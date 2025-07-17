@@ -123,6 +123,7 @@ graph TB
 - **Scalable Architecture**: Kubernetes-native with IRSA and service mesh support
 - **Enterprise Integration**: API Gateway, cross-account access, federated authentication
 - **Comprehensive Monitoring**: Real-time alerting, behavior analytics, threat detection
+- **Custom Branding**: Dedicated connector icons for professional OpenMetadata integration
 
 ### 📊 **Data Governance**
 - **Auto-Tagging**: Rule-based tagging for classification and compliance
@@ -519,6 +520,7 @@ graph TD
 - **[🚀 Quick Start Guide](docs/user-guides/quick-start.md)** - Get started in 5 minutes
 - **[📚 Comprehensive Guide](docs/user-guides/comprehensive-guide.md)** - Complete implementation walkthrough
 - **[⚙️ Configuration Guide](docs/user-guides/configuration.md)** - Detailed configuration options and examples
+- **[🎨 Icon Integration](docs/user-guides/icon-integration.md)** - Custom connector icons for OpenMetadata
 - **[🔧 Troubleshooting](docs/user-guides/troubleshooting.md)** - Common issues and solutions
 
 #### 👨‍💻 **Developer Resources**

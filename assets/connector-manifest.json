@@ -1,0 +1,90 @@
+{
+  "name": "s3-connector",
+  "displayName": "S3/MinIO Connector",
+  "description": "Enterprise-grade metadata connector for S3-compatible storage systems",
+  "version": "2.0.0",
+  "author": "Mustapha Fonsau",
+  "license": "MIT",
+  
+  "serviceType": "Database",
+  "connectorType": "Storage",
+  
+  "icon": {
+    "default": "assets/icons/s3-connector-icon.svg",
+    "small": "assets/icons/s3-connector-icon-small.svg",
+    "large": "assets/icons/s3-connector-icon-large.svg"
+  },
+  
+  "metadata": {
+    "category": "Storage",
+    "subcategory": "Object Storage",
+    "tags": ["s3", "minio", "object-storage", "aws", "cloud"],
+    "supportedFormats": [
+      "csv", "json", "jsonl", "parquet", "avro", "orc", 
+      "excel", "tsv", "delta", "hdf5", "pickle", "feather"
+    ],
+    "features": [
+      "schema-inference",
+      "partitioning",
+      "auto-tagging",
+      "rbac",
+      "data-profiling",
+      "hierarchical-folders"
+    ]
+  },
+  
+  "configuration": {
+    "connectionOptions": {
+      "endPointURL": {
+        "type": "string",
+        "description": "S3 endpoint URL (for MinIO or custom S3)",
+        "required": false,
+        "example": "https://s3.amazonaws.com"
+      },
+      "awsRegion": {
+        "type": "string",
+        "description": "AWS region",
+        "required": true,
+        "example": "us-west-2"
+      },
+      "awsAccessKeyId": {
+        "type": "string",
+        "description": "AWS Access Key ID",
+        "required": true,
+        "sensitive": true
+      },
+      "awsSecretAccessKey": {
+        "type": "string",
+        "description": "AWS Secret Access Key",
+        "required": true,
+        "sensitive": true
+      },
+      "bucket_name": {
+        "type": "string",
+        "description": "S3 bucket name to scan",
+        "required": true,
+        "example": "my-data-bucket"
+      },
+      "prefix": {
+        "type": "string",
+        "description": "Object prefix to limit scanning",
+        "required": false,
+        "example": "data/production/"
+      }
+    }
+  },
+  
+  "documentation": {
+    "quickStart": "docs/user-guides/quick-start.md",
+    "comprehensive": "docs/user-guides/comprehensive-guide.md",
+    "configuration": "docs/user-guides/configuration.md",
+    "troubleshooting": "docs/user-guides/troubleshooting.md",
+    "security": "docs/reference/security-authentication.md"
+  },
+  
+  "support": {
+    "email": "mfonsau@talentys.eu",
+    "github": "https://github.com/Monsau/S3connectorplaybook",
+    "documentation": "https://github.com/Monsau/S3connectorplaybook#readme"
+  }
+}

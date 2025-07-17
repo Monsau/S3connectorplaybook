@@ -1,0 +1,162 @@
+source:
+  type: "s3"
+  serviceName: "s3-connector"
+  serviceDisplayName: "S3/MinIO Storage Connector"
+  serviceDescription: "Enterprise-grade metadata connector for S3-compatible storage systems with comprehensive RBAC, security, and governance features"
+  
+  # Icon configuration for OpenMetadata UI
+  serviceIcon:
+    default: "assets/icons/s3-connector-icon.svg"
+    small: "assets/icons/s3-connector-icon-small.svg" 
+    large: "assets/icons/s3-connector-icon-large.svg"
+  
+  # Service metadata
+  serviceMetadata:
+    category: "Storage"
+    subcategory: "Object Storage"
+    version: "2.0.0"
+    author: "Mustapha Fonsau"
+    tags: ["s3", "minio", "object-storage", "aws", "enterprise"]
+    
+    # Supported features
+    capabilities:
+      - "schema-inference"
+      - "auto-partitioning" 
+      - "hierarchical-folders"
+      - "multi-format-support"
+      - "rbac-integration"
+      - "data-profiling"
+      - "auto-tagging"
+      - "compliance-ready"
+    
+    # Supported file formats
+    supportedFormats:
+      structured: ["csv", "tsv", "json", "jsonl"]
+      analytics: ["parquet", "avro", "orc", "delta"]
+      office: ["excel", "xlsx", "xls"]
+      scientific: ["hdf5", "feather", "pickle"]
+  
+  # Connection configuration
+  serviceConnection:
+    config:
+      type: "S3"
+      
+      # Authentication
+      awsConfig:
+        awsRegion: "${AWS_REGION}"
+        awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+        awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+        awsSessionToken: "${AWS_SESSION_TOKEN}"  # Optional
+        endPointURL: "${S3_ENDPOINT_URL}"       # For MinIO/Custom S3
+        
+      # Storage configuration  
+      bucketName: "${S3_BUCKET_NAME}"
+      prefix: "${S3_PREFIX}"                    # Optional
+      
+      # Advanced options
+      connectionOptions:
+        # File processing
+        file_formats: "csv,json,parquet,avro,orc,excel,tsv,delta,hdf5,pickle,feather,jsonl"
+        enable_partition_parsing: "true"
+        sample_size: "100"
+        max_workers: "4"
+        
+        # Path filtering
+        includePathPattern: "${INCLUDE_PATTERN}"  # Optional
+        excludePathPattern: "${EXCLUDE_PATTERN}"  # Optional
+        
+        # Tagging and metadata
+        tag_mapping: "${TAG_MAPPING}"             # Optional
+        default_tags: "Source.S3,Tier.Bronze,Connector.S3Metadata"
+        
+        # Performance and reliability
+        connectionTimeout: "30"
+        readTimeout: "60" 
+        enableMetrics: "true"
+        enableDataProfiling: "false"
+        
+        # Hierarchical folder support
+        enableHierarchicalFolders: "true"
+        folderDepthForTables: "2"
+        includeSubfolderInfo: "true"
+
+# Sink configuration (OpenMetadata)
+sink:
+  type: "metadata-rest"
+  config: {}
+
+# Workflow configuration  
+workflowConfig:
+  loggerLevel: "INFO"
+  enableDebugLog: false
+  
+  # OpenMetadata server configuration
+  openMetadataServerConfig:
+    hostPort: "${OPENMETADATA_HOST_PORT}"
+    authProvider: "${OPENMETADATA_AUTH_PROVIDER}"
+    
+    # Security configuration (choose one)
+    securityConfig:
+      # JWT Token authentication
+      jwtToken: "${OPENMETADATA_JWT_TOKEN}"
+      
+      # OAuth 2.0 authentication  
+      # clientId: "${OAUTH_CLIENT_ID}"
+      # clientSecret: "${OAUTH_CLIENT_SECRET}"
+      # authority: "${OAUTH_AUTHORITY}"
+      # scopes: ["openid", "profile", "email"]
+      
+      # SAML authentication
+      # idpEntityId: "${SAML_IDP_ENTITY_ID}"
+      # spEntityId: "${SAML_SP_ENTITY_ID}"  
+      # ssoUrl: "${SAML_SSO_URL}"
+      
+    # API configuration
+    apiVersion: "v1"
+    includeTopics: true
+    includeTables: true
+    includeDashboards: false
+    includeCharts: false
+    includePipelines: false
+    includeUsers: false
+    includeTeams: false
+    
+    # SSL/TLS configuration
+    verifySSL: true
+    sslConfig:
+      caCertificate: "${SSL_CA_CERTIFICATE}"      # Optional
+      sslCertificate: "${SSL_CERTIFICATE}"        # Optional  
+      sslKey: "${SSL_PRIVATE_KEY}"                # Optional
+
+# Metadata ingestion configuration
+metadataIngestion:
+  # Database/service name in OpenMetadata
+  databaseServiceName: "s3-storage"
+  
+  # Processing options
+  processingOptions:
+    # Batch processing
+    batchSize: 1000
+    maxRetries: 3
+    retryDelay: 5
+    
+    # Table creation
+    createMissingDatabase: true
+    createMissingSchema: true
+    createMissingTables: true
+    
+    # Metadata options
+    includeViews: false
+    includeTags: true
+    includeOwner: true
+    includeDescription: true
+    includeSampleData: true
+    
+    # Quality and profiling
+    enableDataProfiling: false
+    profileSample: 10000
+    profileSampleType: "PERCENTAGE"
+    
+    # Schema evolution
+    markDeletedTables: true
+    markDeletedColumns: true

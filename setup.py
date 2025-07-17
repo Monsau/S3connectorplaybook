@@ -93,6 +93,7 @@ setup(
     include_package_data=True,
     package_data={
         "om_s3_connector": ["py.typed"],
+        "": ["assets/icons/*.svg", "assets/*.json"],
     },
     
     # Keywords
