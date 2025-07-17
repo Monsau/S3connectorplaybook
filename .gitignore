@@ -85,17 +85,48 @@ config.ini
 secrets.yaml
 credentials.json
 
-# IDE files
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.sublime-project
+.sublime-workspace
+*.code-workspace
+.vscode-test/
+
+# JetBrains IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
 # OS files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
 
 # Temporary files
 *.tmp
@@ -136,6 +167,76 @@ sample-data/
 config/local.yaml
 config/*-local.yaml
 playbooks/local-*.yaml
+
+# Node.js (if any frontend components are added)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+.docker/
+
+# Development and testing folders
+coverage/
+.nyc_output/
+.jest/
+__tests__/__snapshots__/
+
+# Documentation build artifacts
+docs/_build/
+docs/build/
+site/
+_site/
+
+# Package manager lock files (optional - uncomment if needed)
+# Pipfile.lock
+# poetry.lock
+# yarn.lock
+# package-lock.json
+
+# Cache directories
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+
+# Development databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Local development overrides
+local/
+local-*/
+dev/
+development/
+
+# Personal notes and scratch files
+notes/
+scratch/
+TODO.md
+NOTES.md
+*.draft
+*.wip
+
+# Build artifacts and compiled files
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+build/
+dist/
+*.tar.gz
+*.zip
 
 # Legacy files
 wind-farm.json
