@@ -1,11 +1,12 @@
 # Enhanced S3 Connector Configuration Examples
 # This file contains various configuration examples for different scenarios
+# Updated with comprehensive authentication methods and RBAC configurations
 
 # =============================================================================
-# BASIC AWS S3 CONFIGURATION
+# BASIC AWS S3 CONFIGURATION WITH ACCESS KEYS
 # =============================================================================
 ---
-# Example 1: Basic AWS S3 with Access Keys
+# Example 1: Basic AWS S3 with Access Keys and JWT Authentication
 source:
   type: custom-s3
   serviceName: "aws-s3-datalake"
@@ -14,14 +15,21 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsAccessKeyId: "AKIA..."
-        awsSecretAccessKey: "..."
+        # S3 Authentication
+        securityProtocol: "access_key"
+        awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+        awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
         awsRegion: "us-west-2"
         bucketName: "my-data-lake"
+        
+        # File processing configuration
         file_formats: "csv,json,parquet,avro,orc"
         enable_partition_parsing: "true"
-        tag_mapping: "pii:PII.PersonalData;financial:Finance.Sensitive"
-        default_tags: "Source.S3,Tier.Bronze"
+        max_sample_rows: "100"
+        
+        # Tagging and classification
+        tag_mapping: "pii:PII.PersonalData;financial:Finance.Sensitive;public:Classification.Public"
+        default_tags: "Source.S3,Tier.Bronze,Environment.Production"
 
 sink:
   type: metadata-rest
@@ -33,13 +41,13 @@ workflowConfig:
     hostPort: "http://localhost:8585/api"
     authProvider: "openmetadata"
     securityConfig:
-      jwtToken: "YOUR_JWT_TOKEN"
+      jwtToken: "${OPENMETADATA_JWT_TOKEN}"
 
 ---
 # =============================================================================
-# MINIO CONFIGURATION
+# MINIO CONFIGURATION WITH OAUTH2 AUTHENTICATION
 # =============================================================================
-# Example 2: MinIO with Development Settings
+# Example 2: MinIO with Development Settings and OAuth2
 source:
   type: custom-s3
   serviceName: "minio-dev-storage"
@@ -48,18 +56,24 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsAccessKeyId: "minioadmin"
-        awsSecretAccessKey: "minioadmin"
+        # MinIO Authentication
+        securityProtocol: "access_key"
+        awsAccessKeyId: "${MINIO_ACCESS_KEY}"
+        awsSecretAccessKey: "${MINIO_SECRET_KEY}"
         awsRegion: "us-east-1"
         endPointURL: "http://localhost:9000"
         bucketName: "development-data"
-        file_formats: "csv,json,parquet,excel,feather"
+        
+        # Enhanced file processing
+        file_formats: "csv,json,parquet,excel,feather,hdf5"
         enable_partition_parsing: "true"
         enable_hierarchical_folders: "true"
         folder_depth_for_tables: "2"
         max_sample_rows: "50"
-        tag_mapping: "dev:Environment.Development;test:DataQuality.Test"
-        default_tags: "Environment.Dev,Source.MinIO"
+        
+        # Development tagging
+        tag_mapping: "dev:Environment.Development;test:DataQuality.Test;experimental:Status.Experimental"
+        default_tags: "Environment.Dev,Source.MinIO,Purpose.Development"
 
 sink:
   type: metadata-rest
@@ -69,15 +83,18 @@ workflowConfig:
   loggerLevel: DEBUG
   openMetadataServerConfig:
     hostPort: "http://localhost:8585/api"
-    authProvider: "openmetadata"
+    authProvider: "oauth2"
     securityConfig:
-      jwtToken: "YOUR_JWT_TOKEN"
+      clientId: "${OAUTH_CLIENT_ID}"
+      clientSecret: "${OAUTH_CLIENT_SECRET}"
+      tokenEndpoint: "https://auth-dev.company.com/oauth/token"
+      scopes: ["read:metadata", "write:metadata"]
 
 ---
 # =============================================================================
-# ENTERPRISE CONFIGURATION
+# ENTERPRISE CONFIGURATION WITH IAM ROLES AND OIDC
 # =============================================================================
-# Example 3: Enterprise AWS S3 with IAM Roles
+# Example 3: Enterprise AWS S3 with IAM Roles and OIDC Authentication
 source:
   type: custom-s3
   serviceName: "enterprise-s3-lake"
@@ -86,26 +103,45 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsRegion: "us-west-2"
+        # IAM Role Authentication
+        securityProtocol: "iam_role"
         roleArn: "arn:aws:iam::123456789012:role/OpenMetadataS3Role"
+        roleSessionName: "openmetadata-enterprise-ingestion"
+        externalId: "${EXTERNAL_ID}"
+        durationSeconds: 3600
+        awsRegion: "us-west-2"
         bucketName: "enterprise-data-lake"
+        
+        # High-performance file processing
         file_formats: "parquet,avro,orc,delta,feather"
         enable_partition_parsing: "true"
         enable_hierarchical_folders: "true"
         folder_depth_for_tables: "1"
+        
+        # Path filtering for production data
         include_path_pattern: "^(production|staging)/"
-        exclude_path_pattern: "/(temp|archive|backup)/"
+        exclude_path_pattern: "/(temp|archive|backup|test)/"
         max_sample_rows: "1000"
+        
+        # Data profiling and performance
         enable_data_profiling: "true"
         profiling_batch_size: "5000"
+        max_workers: "6"
+        connection_timeout: "60"
+        read_timeout: "120"
+        
+        # Enterprise tagging and governance
         tag_mapping: |
           production:Environment.Production;
           staging:Environment.Staging;
           pii:PII.PersonalData;
           financial:Finance.CriticalData;
           public:Classification.Public;
-          internal:Classification.Internal
-        default_tags: "Source.S3,Governance.Managed"
+          internal:Classification.Internal;
+          confidential:Classification.Confidential;
+          customer:Domain.Customer;
+          revenue:Domain.Financial
+        default_tags: "Source.S3,Governance.Managed,Tier.Gold,Compliance.SOX"
 
 sink:
   type: metadata-rest
@@ -115,15 +151,195 @@ workflowConfig:
   loggerLevel: INFO
   openMetadataServerConfig:
     hostPort: "https://openmetadata.company.com/api"
-    authProvider: "openmetadata"
+    authProvider: "oidc"
     securityConfig:
-      jwtToken: "YOUR_PRODUCTION_JWT_TOKEN"
+      clientId: "${OIDC_CLIENT_ID}"
+      clientSecret: "${OIDC_CLIENT_SECRET}"
+      issuer: "https://auth.company.com"
+      # Custom claims mapping for enterprise
+      claimsMapping:
+        email: "preferred_username"
+        roles: "groups"
+        name: "full_name"
+        department: "department"
 
 ---
 # =============================================================================
-# MULTI-FORMAT CONFIGURATION
+# CROSS-ACCOUNT S3 ACCESS WITH SAML AUTHENTICATION
 # =============================================================================
-# Example 4: All Supported Formats
+# Example 4: Cross-Account S3 Access with SAML SSO
+source:
+  type: custom-s3
+  serviceName: "cross-account-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        # Cross-account IAM role with external ID
+        securityProtocol: "iam_role"
+        roleArn: "arn:aws:iam::TARGET-ACCOUNT:role/CrossAccountS3Role"
+        roleSessionName: "openmetadata-cross-account"
+        externalId: "${CROSS_ACCOUNT_EXTERNAL_ID}"
+        sourceRoleArn: "arn:aws:iam::SOURCE-ACCOUNT:role/ConnectorRole"
+        durationSeconds: 3600
+        awsRegion: "us-east-1"
+        bucketName: "shared-data-lake"
+        
+        # Multi-format support
+        file_formats: "csv,json,parquet,avro,orc,excel,tsv,jsonl"
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "2"
+        max_sample_rows: "200"
+        
+        # Cross-account tagging
+        tag_mapping: |
+          shared:Access.CrossAccount;
+          partner:Source.Partner;
+          trusted:Security.Trusted;
+          analytics:Purpose.Analytics
+        default_tags: "Source.S3,Access.CrossAccount,Security.Verified"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "saml"
+    securityConfig:
+      # SAML 2.0 Configuration
+      idpEntityId: "https://idp.company.com/saml/metadata"
+      spEntityId: "openmetadata-s3-connector"
+      ssoUrl: "https://idp.company.com/saml/sso"
+      x509Certificate: "${SAML_CERTIFICATE}"
+      privateKey: "${SAML_PRIVATE_KEY}"
+      # Attribute mapping for enterprise SSO
+      attributeMapping:
+        email: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        roles: "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"
+        department: "http://schemas.company.com/claims/department"
+
+---
+# =============================================================================
+# STS TOKEN AUTHENTICATION WITH LDAP
+# =============================================================================
+# Example 5: STS Token Authentication with LDAP
+source:
+  type: custom-s3
+  serviceName: "sts-secured-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        # STS Token Authentication with MFA
+        securityProtocol: "sts_token"
+        stsEndpoint: "https://sts.amazonaws.com"
+        roleArn: "arn:aws:iam::123456789012:role/STSSecuredRole"
+        roleSessionName: "openmetadata-sts-session"
+        mfaSerialNumber: "arn:aws:iam::123456789012:mfa/openmetadata-user"
+        mfaTokenCode: "${MFA_TOKEN_CODE}"
+        durationSeconds: 3600
+        awsRegion: "us-west-2"
+        bucketName: "secure-data-vault"
+        
+        # Secure file processing
+        file_formats: "parquet,avro,orc"  # Only secure formats
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "1"
+        max_sample_rows: "500"
+        enable_data_profiling: "true"
+        
+        # Security-focused tagging
+        tag_mapping: |
+          sensitive:Security.Sensitive;
+          encrypted:Security.Encrypted;
+          audited:Compliance.Audited;
+          mfa:Security.MFA
+        default_tags: "Source.S3,Security.High,Compliance.Required"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "ldap"
+    securityConfig:
+      username: "${LDAP_SERVICE_ACCOUNT}"
+      password: "${LDAP_SERVICE_PASSWORD}"
+      ldapUrl: "ldaps://ldap.company.com:636"
+      baseDN: "dc=company,dc=com"
+      userSearchBase: "ou=service-accounts,ou=users"
+      groupSearchBase: "ou=groups"
+      useSsl: true
+      trustStore: "/etc/ssl/certs/ldap-truststore.jks"
+      trustStorePassword: "${LDAP_TRUSTSTORE_PASSWORD}"
+
+---
+# =============================================================================
+# KUBERNETES/EKS WITH IRSA AND SERVICE MESH
+# =============================================================================
+# Example 6: Kubernetes EKS with IRSA and Service Mesh Authentication
+source:
+  type: custom-s3
+  serviceName: "eks-irsa-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        # IRSA (IAM Roles for Service Accounts)
+        securityProtocol: "instance_profile"
+        awsRegion: "us-west-2"
+        instanceProfileName: "OpenMetadataS3ConnectorProfile"
+        bucketName: "kubernetes-data-lake"
+        
+        # Kubernetes-optimized settings
+        file_formats: "parquet,avro,json,csv"
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "2"
+        max_sample_rows: "100"
+        max_workers: "4"  # Pod resource constraints
+        
+        # Kubernetes tagging
+        tag_mapping: |
+          k8s:Platform.Kubernetes;
+          irsa:Auth.IRSA;
+          mesh:Network.ServiceMesh;
+          microservice:Architecture.Microservice
+        default_tags: "Source.S3,Platform.K8s,Auth.IRSA"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "http://openmetadata.openmetadata.svc.cluster.local:8585/api"
+    authProvider: "custom"
+    securityConfig:
+      # Service mesh authentication
+      serviceMeshEnabled: true
+      jwtToken: "${ISTIO_JWT_TOKEN}"
+      customHeaders:
+        "X-Service-Name": "s3-connector"
+        "X-Namespace": "openmetadata"
+        "X-Cluster": "${CLUSTER_NAME}"
+---
+# =============================================================================
+# MULTI-FORMAT CONFIGURATION WITH CERTIFICATE AUTH
+# =============================================================================
+# Example 7: All Supported Formats with Certificate Authentication
 source:
   type: custom-s3
   serviceName: "multi-format-storage"
@@ -132,12 +348,21 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsAccessKeyId: "YOUR_ACCESS_KEY"
-        awsSecretAccessKey: "YOUR_SECRET_KEY"
+        # Certificate-based authentication
+        securityProtocol: "certificate"
+        certificateArn: "arn:aws:acm::123456789012:certificate/12345678-1234-1234-1234-123456789012"
         awsRegion: "us-east-1"
-        endPointURL: "http://minio:9000"
+        endPointURL: "https://s3-api.company.com"
         bucketName: "multi-format-data"
-        # All supported formats
+        
+        # mTLS Configuration
+        useSSL: true
+        verifySSL: true
+        caCertFile: "/etc/ssl/certs/ca-certificates.crt"
+        clientCertFile: "/etc/ssl/client/client.crt"
+        clientKeyFile: "/etc/ssl/client/client.key"
+        
+        # Comprehensive format support
         file_formats: "csv,tsv,json,jsonl,parquet,avro,orc,excel,feather,hdf5,pickle,delta"
         enable_partition_parsing: "true"
         enable_hierarchical_folders: "true"
@@ -145,6 +370,8 @@ source:
         include_subfolder_info: "true"
         max_sample_rows: "200"
         enable_metrics: "true"
+        
+        # Format-specific tagging
         tag_mapping: |
           csv:Format.CSV;
           json:Format.JSON;
@@ -153,8 +380,10 @@ source:
           orc:Format.ORC;
           excel:Format.Excel;
           scientific:DataType.Scientific;
-          ml:DataType.MachineLearning
-        default_tags: "Source.S3,Format.Mixed"
+          ml:DataType.MachineLearning;
+          analytics:Purpose.Analytics;
+          archive:Status.Archive
+        default_tags: "Source.S3,Format.Mixed,Security.mTLS"
 
 sink:
   type: metadata-rest
@@ -163,16 +392,22 @@ sink:
 workflowConfig:
   loggerLevel: INFO
   openMetadataServerConfig:
-    hostPort: "http://localhost:8585/api"
-    authProvider: "openmetadata"
+    hostPort: "https://openmetadata-secure.company.com/api"
+    authProvider: "certificate"
     securityConfig:
-      jwtToken: "YOUR_JWT_TOKEN"
+      # Mutual TLS for OpenMetadata API
+      enableMutualTLS: true
+      clientCertificate: "/etc/ssl/client/openmetadata-client.crt"
+      clientPrivateKey: "/etc/ssl/client/openmetadata-client.key"
+      caCertificate: "/etc/ssl/ca/openmetadata-ca.crt"
+      certificateChain: "/etc/ssl/chain/cert-chain.pem"
+      subjectDN: "CN=s3-connector,OU=DataEngineering,O=Company,C=US"
 
 ---
 # =============================================================================
-# HIGH-PERFORMANCE CONFIGURATION
+# HIGH-PERFORMANCE CONFIGURATION WITH API GATEWAY
 # =============================================================================
-# Example 5: High-Performance Setup for Large Data Lakes
+# Example 8: High-Performance Setup with API Gateway Authentication
 source:
   type: custom-s3
   serviceName: "high-perf-datalake"
@@ -181,29 +416,46 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsAccessKeyId: "YOUR_ACCESS_KEY"
-        awsSecretAccessKey: "YOUR_SECRET_KEY"
+        # High-performance S3 access
+        securityProtocol: "access_key"
+        awsAccessKeyId: "${HIGH_PERF_ACCESS_KEY}"
+        awsSecretAccessKey: "${HIGH_PERF_SECRET_KEY}"
         awsRegion: "us-west-2"
         bucketName: "big-data-lake"
-        file_formats: "parquet,avro,orc,delta"  # Only high-performance formats
+        
+        # VPC Endpoint for improved performance
+        endPointURL: "https://vpce-1234567-abcd1234.s3.us-west-2.vpce.amazonaws.com"
+        forcePathStyle: true
+        
+        # Performance-optimized formats only
+        file_formats: "parquet,avro,orc,delta"
         enable_partition_parsing: "true"
         enable_hierarchical_folders: "true"
         folder_depth_for_tables: "1"
-        max_sample_rows: "500"
-        max_workers: "8"  # Parallel processing
+        max_sample_rows: "1000"
+        
+        # High-performance settings
+        max_workers: "12"  # Maximum parallel processing
         connection_timeout: "60"
-        read_timeout: "120"
+        read_timeout: "180"
         enable_metrics: "true"
         enable_data_profiling: "true"
-        profiling_batch_size: "10000"
-        include_path_pattern: "^data/(current|recent)/"
-        exclude_path_pattern: "/(archive|temp|staging)/"
+        profiling_batch_size: "20000"
+        
+        # Production path filtering
+        include_path_pattern: "^data/(current|recent|hot)/"
+        exclude_path_pattern: "/(archive|temp|staging|cold)/"
+        
+        # Performance and scale tagging
         tag_mapping: |
           current:Freshness.Current;
           recent:Freshness.Recent;
+          hot:Temperature.Hot;
           large:Size.Large;
-          critical:Priority.Critical
-        default_tags: "Source.S3,Performance.Optimized,Scale.Large"
+          critical:Priority.Critical;
+          realtime:Latency.RealTime;
+          batch:Processing.Batch
+        default_tags: "Source.S3,Performance.Optimized,Scale.Large,Tier.Platinum"
 
 sink:
   type: metadata-rest
@@ -212,16 +464,26 @@ sink:
 workflowConfig:
   loggerLevel: INFO
   openMetadataServerConfig:
-    hostPort: "http://localhost:8585/api"
-    authProvider: "openmetadata"
+    hostPort: "https://api-gateway.company.com/openmetadata/api"
+    authProvider: "api_gateway"
     securityConfig:
-      jwtToken: "YOUR_JWT_TOKEN"
+      # API Gateway authentication
+      apiKey: "${API_GATEWAY_KEY}"
+      clientId: "${API_GATEWAY_CLIENT_ID}"
+      signRequests: true
+      signingKey: "${API_GATEWAY_SIGNING_KEY}"
+      rateLimitToken: "${RATE_LIMIT_TOKEN}"
+      customHeaders:
+        "X-API-Version": "v1"
+        "X-Client-Type": "s3-connector"
+        "X-Priority": "high"
+        "X-Environment": "production"
 
 ---
 # =============================================================================
-# DEVELOPMENT AND TESTING CONFIGURATION
+# DEVELOPMENT AND TESTING WITH BOT ACCOUNT
 # =============================================================================
-# Example 6: Development Environment with Debugging
+# Example 9: Development Environment with Bot Account and Debugging
 source:
   type: custom-s3
   serviceName: "dev-test-storage"
@@ -230,18 +492,24 @@ source:
       type: CustomDatabase
       sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        awsAccessKeyId: "minioadmin"
-        awsSecretAccessKey: "minioadmin"
+        # Development MinIO setup
+        securityProtocol: "access_key"
+        awsAccessKeyId: "${DEV_MINIO_ACCESS_KEY}"
+        awsSecretAccessKey: "${DEV_MINIO_SECRET_KEY}"
         awsRegion: "us-east-1"
         endPointURL: "http://localhost:9000"
         bucketName: "test-bucket"
-        file_formats: "csv,json,parquet"  # Limited for testing
+        
+        # Limited formats for testing
+        file_formats: "csv,json,parquet"
         enable_partition_parsing: "true"
-        enable_hierarchical_folders: "false"  # Simpler structure for testing
-        max_sample_rows: "10"  # Small samples for quick testing
+        enable_hierarchical_folders: "false"  # Simpler for testing
+        max_sample_rows: "10"  # Small samples
         enable_metrics: "true"
-        tag_mapping: "test:Environment.Test;sample:DataQuality.Sample"
-        default_tags: "Environment.Development,Source.Test"
+        
+        # Development tagging
+        tag_mapping: "test:Environment.Test;sample:DataQuality.Sample;dev:Purpose.Development"
+        default_tags: "Environment.Development,Source.Test,Purpose.QA"
 
 sink:
   type: metadata-rest
@@ -253,4 +521,732 @@ workflowConfig:
     hostPort: "http://localhost:8585/api"
     authProvider: "openmetadata"
     securityConfig:
-      jwtToken: "YOUR_DEV_JWT_TOKEN"
+      # Bot account for development
+      jwtToken: "${DEV_BOT_JWT_TOKEN}"  # Created via: POST /api/v1/bots
+
+---
+# =============================================================================
+# MULTI-ENVIRONMENT CONFIGURATION TEMPLATE
+# =============================================================================
+# Example 10: Environment-Specific Configuration Template
+# Note: Use environment variables or configuration management tools
+environments:
+  development:
+    source:
+      serviceName: "dev-s3-connector"
+      connectionOptions:
+        securityProtocol: "access_key"
+        awsAccessKeyId: "${DEV_AWS_ACCESS_KEY}"
+        awsSecretAccessKey: "${DEV_AWS_SECRET_KEY}"
+        endPointURL: "http://minio-dev.company.com:9000"
+        bucketName: "development-data"
+        file_formats: "csv,json,parquet"
+        max_sample_rows: "50"
+        tag_mapping: "dev:Environment.Development"
+        default_tags: "Environment.Dev,Source.MinIO"
+    openmetadata:
+      hostPort: "http://openmetadata-dev.company.com/api"
+      authProvider: "openmetadata"
+      jwtToken: "${DEV_OM_JWT_TOKEN}"
+      
+  staging:
+    source:
+      serviceName: "staging-s3-connector"
+      connectionOptions:
+        securityProtocol: "iam_role"
+        roleArn: "arn:aws:iam::123456789012:role/StagingS3Role"
+        awsRegion: "us-west-2"
+        bucketName: "staging-data-lake"
+        file_formats: "csv,json,parquet,avro,orc"
+        max_sample_rows: "200"
+        tag_mapping: "staging:Environment.Staging"
+        default_tags: "Environment.Staging,Source.S3"
+    openmetadata:
+      hostPort: "http://openmetadata-staging.company.com/api"
+      authProvider: "oauth2"
+      clientId: "${STAGING_OAUTH_CLIENT_ID}"
+      clientSecret: "${STAGING_OAUTH_CLIENT_SECRET}"
+      tokenEndpoint: "https://auth-staging.company.com/oauth/token"
+      
+  production:
+    source:
+      serviceName: "prod-s3-connector"
+      connectionOptions:
+        securityProtocol: "instance_profile"
+        awsRegion: "us-west-2"
+        bucketName: "production-data-lake"
+        file_formats: "parquet,avro,orc,delta"
+        max_sample_rows: "1000"
+        enable_data_profiling: "true"
+        tag_mapping: "prod:Environment.Production"
+        default_tags: "Environment.Production,Source.S3,Tier.Gold"
+    openmetadata:
+      hostPort: "https://openmetadata.company.com/api"
+      authProvider: "oidc"
+      clientId: "${PROD_OIDC_CLIENT_ID}"
+      issuer: "https://auth.company.com"
+
+---
+# =============================================================================
+# RBAC IMPLEMENTATION EXAMPLES
+# =============================================================================
+
+---
+# =============================================================================
+# EXAMPLE 11: TEAM-BASED RBAC WITH DOMAIN ACCESS CONTROL
+# =============================================================================
+# Team-based access control with domain-specific permissions
+source:
+  type: custom-s3
+  serviceName: "team-based-s3-lake"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        securityProtocol: "iam_role"
+        roleArn: "arn:aws:iam::123456789012:role/TeamBasedS3Role"
+        awsRegion: "us-west-2"
+        bucketName: "team-data-lake"
+        file_formats: "csv,json,parquet,avro"
+        enable_partition_parsing: "true"
+        
+        # Domain-based path mapping
+        include_path_pattern: "^(customer|financial|marketing)/"
+        
+        # Team-specific tagging
+        tag_mapping: |
+          customer:Domain.Customer,Team.CustomerAnalytics;
+          financial:Domain.Financial,Team.Finance;
+          marketing:Domain.Marketing,Team.Marketing;
+          shared:Access.Shared,Team.All
+        default_tags: "Source.S3,Access.TeamBased,Governance.RBAC"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "${TEAM_BASED_JWT_TOKEN}"
+      
+  # RBAC Configuration
+  rbacConfig:
+    # Team definitions with role-based access
+    teams:
+      - name: "CustomerDataTeam"
+        displayName: "Customer Data Analytics Team"
+        teamType: "Department"
+        description: "Team responsible for customer data analysis and insights"
+        
+        # Team members with specific roles
+        members:
+          - email: "customer.analyst@company.com"
+            role: "CustomerDataAnalyst"
+            permissions: ["View", "Query", "Export"]
+            datasetScope: ["customer.*"]
+            
+          - email: "customer.steward@company.com"
+            role: "CustomerDataSteward" 
+            permissions: ["View", "Edit", "Create", "Delete"]
+            datasetScope: ["customer.*"]
+            
+          - email: "customer.lead@company.com"
+            role: "CustomerTeamLead"
+            permissions: ["View", "Edit", "Create", "Delete", "ManageTeam"]
+            datasetScope: ["customer.*", "shared.*"]
+        
+        # Team-level permissions and restrictions
+        teamPermissions:
+          allowedOperations: ["ViewMetadata", "QueryData", "ExportData", "CreateDashboard"]
+          restrictedOperations: ["DeleteDatabase", "ModifySchema"]
+          accessSchedule:
+            businessHours: true
+            weekendsAllowed: false
+          dataClassificationAccess: ["PUBLIC", "INTERNAL", "CUSTOMER_DATA"]
+          
+      - name: "FinancialDataTeam"
+        displayName: "Financial Data Team"
+        teamType: "Department"
+        description: "Team handling financial data and compliance"
+        
+        members:
+          - email: "finance.analyst@company.com"
+            role: "FinancialAnalyst"
+            permissions: ["View", "Query"]
+            datasetScope: ["financial.*"]
+            conditions:
+              ipWhitelist: ["10.0.0.0/8"]
+              requireMFA: true
+              
+          - email: "compliance.officer@company.com"
+            role: "ComplianceOfficer"
+            permissions: ["View", "Audit", "ManageCompliance"]
+            datasetScope: ["financial.*", "audit.*"]
+            
+        teamPermissions:
+          allowedOperations: ["ViewMetadata", "QueryData", "GenerateReports"]
+          restrictedOperations: ["ExportData", "ShareExternally"]
+          accessSchedule:
+            businessHours: true
+            maxSessionDuration: "4h"
+          dataClassificationAccess: ["FINANCIAL", "CONFIDENTIAL"]
+          auditLevel: "HIGH"
+    
+    # Custom role definitions
+    customRoles:
+      - name: "CustomerDataAnalyst"
+        displayName: "Customer Data Analyst"
+        description: "Analyst role for customer domain data"
+        permissions:
+          metadata: ["View:Database", "View:Table", "View:Schema", "ViewLineage"]
+          data: ["ViewSampleData", "QueryData", "ExportData"]
+          operations: ["CreateDashboard", "CreateQuery", "SaveQuery"]
+        resourceScope:
+          databases: ["s3://team-data-lake/customer/*"]
+          tables: ["customer.*"]
+        conditions:
+          maxQueryRows: 50000
+          allowedTimeRange: "business_hours"
+          dataRetentionAccess: "6_months"
+          
+      - name: "CustomerDataSteward"
+        displayName: "Customer Data Steward"
+        description: "Data steward role for customer domain"
+        permissions:
+          metadata: ["View:Database", "Edit:Database", "View:Table", "Edit:Table", "ManageLineage", "ManageGlossary"]
+          data: ["ViewSampleData", "ViewProfileData", "QueryData"]
+          operations: ["ManageIngestion", "ManageQuality", "CreatePolicies"]
+        resourceScope:
+          databases: ["s3://team-data-lake/customer/*"]
+          tables: ["customer.*"]
+        conditions:
+          requireApprovalFor: ["DeleteTable", "ModifySchema"]
+          auditAllActions: true
+          
+      - name: "FinancialAnalyst"
+        displayName: "Financial Data Analyst"
+        description: "Restricted analyst role for financial data"
+        permissions:
+          metadata: ["View:Database", "View:Table", "ViewLineage"]
+          data: ["ViewSampleData", "QueryData"]
+          operations: ["CreateDashboard", "GenerateReports"]
+        resourceScope:
+          databases: ["s3://team-data-lake/financial/*"]
+          tables: ["financial.*", "revenue.*"]
+        conditions:
+          maxQueryRows: 10000
+          requireMFA: true
+          allowedTimeRange: "business_hours"
+          ipWhitelist: ["10.0.0.0/8", "172.16.0.0/12"]
+          dataExportRestricted: true
+
+---
+# =============================================================================
+# EXAMPLE 12: DYNAMIC RBAC WITH ATTRIBUTE-BASED ACCESS CONTROL
+# =============================================================================
+# Advanced RBAC with dynamic role assignment based on data attributes
+source:
+  type: custom-s3
+  serviceName: "dynamic-rbac-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        securityProtocol: "iam_role"
+        roleArn: "arn:aws:iam::123456789012:role/DynamicRBACRole"
+        awsRegion: "us-east-1"
+        bucketName: "dynamic-access-lake"
+        file_formats: "parquet,avro,json"
+        enable_partition_parsing: "true"
+        
+        # Classification-based tagging for ABAC
+        tag_mapping: |
+          public:Classification.Public,Access.All;
+          internal:Classification.Internal,Access.Employee;
+          confidential:Classification.Confidential,Access.Authorized;
+          restricted:Classification.Restricted,Access.SpecialAccess;
+          pii:DataType.PII,Compliance.GDPR;
+          financial:DataType.Financial,Compliance.SOX;
+          healthcare:DataType.Healthcare,Compliance.HIPAA
+        default_tags: "Source.S3,Access.Dynamic,RBAC.ABAC"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "oidc"
+    securityConfig:
+      clientId: "${DYNAMIC_RBAC_CLIENT_ID}"
+      clientSecret: "${DYNAMIC_RBAC_CLIENT_SECRET}"
+      issuer: "https://auth.company.com"
+      claimsMapping:
+        email: "email"
+        roles: "groups"
+        department: "department"
+        clearanceLevel: "security_clearance"
+        businessUnit: "business_unit"
+        
+  # Dynamic RBAC Configuration with ABAC
+  rbacConfig:
+    # Dynamic role assignment rules
+    dynamicRoles:
+      rules:
+        - name: "PII_Access_Rule"
+          description: "Dynamic access to PII data based on user attributes"
+          condition:
+            dataClassification: ["PII", "SENSITIVE"]
+            userAttributes:
+              department: ["Legal", "Compliance", "HR", "Security"]
+              clearanceLevel: ["HIGH", "CONFIDENTIAL"]
+              trainingCompleted: ["PII_Handling", "GDPR_Compliance"]
+          assignedRole: "PIIDataSteward"
+          accessDuration: "8h"
+          requireApproval: false
+          auditLevel: "HIGH"
+          
+        - name: "Financial_Data_Rule"
+          description: "Access to financial data for authorized users"
+          condition:
+            dataClassification: ["FINANCIAL", "REVENUE"]
+            userAttributes:
+              department: ["Finance", "Accounting", "Executive", "Audit"]
+              businessUnit: ["Corporate"]
+              roleLevel: ["Senior", "Manager", "Director"]
+          assignedRole: "FinancialDataAnalyst"
+          accessDuration: "4h"
+          requireApproval: true
+          approvers: ["finance.director@company.com"]
+          
+        - name: "Healthcare_Data_Rule"
+          description: "HIPAA-compliant access to healthcare data"
+          condition:
+            dataClassification: ["HEALTHCARE", "PHI"]
+            userAttributes:
+              department: ["Healthcare", "Medical", "Research"]
+              certification: ["HIPAA_Certified"]
+              location: ["OnPremise", "SecureVPN"]
+          assignedRole: "HealthcareDataAnalyst"
+          accessDuration: "6h"
+          requireApproval: true
+          conditions:
+            ipWhitelist: ["10.0.0.0/8"]
+            timeRestriction: "business_hours"
+            
+        - name: "Public_Data_Rule"
+          description: "General access to public datasets"
+          condition:
+            dataClassification: ["PUBLIC", "UNRESTRICTED"]
+          assignedRole: "DataConsumer"
+          accessDuration: "24h"
+          requireApproval: false
+          defaultAccess: true
+    
+    # Attribute-based access control policies
+    abacPolicies:
+      - name: "TimeBasedAccess"
+        effect: "Allow"
+        subjects:
+          roles: ["DataAnalyst", "BusinessUser"]
+          departments: ["Marketing", "Sales", "Operations"]
+        resources:
+          datasets: ["*.reports.*", "*.analytics.*", "*.dashboards.*"]
+          dataClassification: ["PUBLIC", "INTERNAL"]
+        actions: ["View", "Query", "Export"]
+        conditions:
+          timeOfDay:
+            start: "06:00"
+            end: "20:00"
+          daysOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+          timezone: "America/New_York"
+          
+      - name: "LocationBasedAccess"
+        effect: "Allow"
+        subjects:
+          roles: ["RemoteWorker", "Contractor"]
+        resources:
+          datasets: ["public.*", "shared.*"]
+          dataClassification: ["PUBLIC"]
+        actions: ["View", "Query"]
+        conditions:
+          sourceIP: ["203.0.113.0/24", "198.51.100.0/24"]
+          vpnRequired: true
+          deviceCompliant: true
+          
+      - name: "SensitiveDataRestriction"
+        effect: "Deny"
+        subjects:
+          roles: ["Intern", "TemporaryWorker", "Vendor"]
+          contractorType: ["External"]
+        resources:
+          datasets: ["*"]
+          dataClassification: ["CONFIDENTIAL", "RESTRICTED", "PII", "FINANCIAL"]
+        actions: ["*"]
+        conditions:
+          override: false
+          escalationRequired: true
+          
+      - name: "DataExportControl"
+        effect: "Allow"
+        subjects:
+          roles: ["DataSteward", "Manager", "Director"]
+          approvalLevel: ["L2", "L3"]
+        resources:
+          datasets: ["*"]
+          dataClassification: ["INTERNAL", "CONFIDENTIAL"]
+        actions: ["Export", "Download", "Share"]
+        conditions:
+          maxRecords: 10000
+          approvalRequired: true
+          auditTrail: true
+          expirationDays: 7
+
+---
+# =============================================================================
+# EXAMPLE 13: COMPLIANCE-FOCUSED RBAC WITH AUDIT TRAILS
+# =============================================================================
+# Compliance-oriented RBAC with comprehensive audit and monitoring
+source:
+  type: custom-s3
+  serviceName: "compliance-rbac-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        securityProtocol: "iam_role"
+        roleArn: "arn:aws:iam::123456789012:role/ComplianceRBACRole"
+        awsRegion: "us-west-2"
+        bucketName: "compliance-data-lake"
+        file_formats: "parquet,avro"  # Only approved formats
+        enable_partition_parsing: "true"
+        enable_data_profiling: "true"
+        
+        # Compliance-focused tagging
+        tag_mapping: |
+          gdpr:Compliance.GDPR,Region.EU;
+          ccpa:Compliance.CCPA,Region.California;
+          hipaa:Compliance.HIPAA,Industry.Healthcare;
+          sox:Compliance.SOX,Industry.Financial;
+          pci:Compliance.PCI,Industry.Payment;
+          audited:Status.Audited,Quality.Verified;
+          retention:Policy.Retention,Lifecycle.Managed
+        default_tags: "Source.S3,Compliance.Enabled,Audit.Required"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "saml"
+    securityConfig:
+      idpEntityId: "https://idp.company.com/saml/metadata"
+      spEntityId: "openmetadata-compliance-connector"
+      ssoUrl: "https://idp.company.com/saml/sso"
+      x509Certificate: "${SAML_CERTIFICATE}"
+      privateKey: "${SAML_PRIVATE_KEY}"
+      attributeMapping:
+        email: "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        roles: "http://schemas.microsoft.com/ws/2008/06/identity/claims/groups"
+        department: "http://schemas.company.com/claims/department"
+        complianceRole: "http://schemas.company.com/claims/compliance_role"
+        
+  # Compliance RBAC Configuration
+  rbacConfig:
+    # Compliance-specific roles
+    complianceRoles:
+      - name: "GDPRDataProtectionOfficer"
+        displayName: "GDPR Data Protection Officer"
+        description: "Role for GDPR compliance and data protection"
+        permissions:
+          metadata: ["View:All", "Edit:DataClassification", "ManagePrivacy"]
+          data: ["ViewProfileData", "ViewPIIData", "AuditDataAccess"]
+          compliance: ["ManageGDPR", "ProcessDataRequests", "GeneratePrivacyReports"]
+        resourceScope:
+          regions: ["EU", "EEA"]
+          dataTypes: ["PII", "SENSITIVE"]
+        conditions:
+          requireMFA: true
+          auditAllActions: true
+          
+      - name: "SOXComplianceAuditor"
+        displayName: "SOX Compliance Auditor"
+        description: "Role for SOX financial compliance auditing"
+        permissions:
+          metadata: ["View:All", "AuditMetadata"]
+          data: ["ViewAuditTrail", "GenerateComplianceReports"]
+          compliance: ["ManageSOX", "AuditFinancialData", "ReviewControls"]
+        resourceScope:
+          industries: ["Financial", "Banking"]
+          dataTypes: ["FINANCIAL", "REVENUE"]
+        conditions:
+          requireDualApproval: true
+          sessionRecording: true
+          
+      - name: "HIPAASecurityOfficer"
+        displayName: "HIPAA Security Officer"
+        description: "Role for HIPAA healthcare compliance"
+        permissions:
+          metadata: ["View:Healthcare", "ManageHealthcarePrivacy"]
+          data: ["ViewPHI", "AuditHealthcareAccess"]
+          compliance: ["ManageHIPAA", "ProcessHealthcareRequests"]
+        resourceScope:
+          industries: ["Healthcare", "Medical"]
+          dataTypes: ["PHI", "HEALTHCARE"]
+        conditions:
+          requireSpecialClearance: true
+          locationRestricted: true
+    
+    # Compliance monitoring and audit
+    auditConfig:
+      enableComprehensiveAudit: true
+      auditLevel: "DETAILED"
+      
+      # Events to audit for compliance
+      auditEvents:
+        - "UserAuthentication"
+        - "RoleAssignment"
+        - "DataAccess"
+        - "DataExport"
+        - "ConfigurationChange"
+        - "PrivilegeEscalation"
+        - "DataClassificationChange"
+        - "ComplianceViolation"
+        
+      # Audit destinations for compliance
+      auditDestinations:
+        - type: "compliance_database"
+          connection: "postgresql://compliance-db.company.com:5432/audit"
+          retentionYears: 7
+          encryption: true
+          
+        - type: "siem"
+          connection: "https://siem.company.com/api/events"
+          realTime: true
+          alerting: true
+          
+        - type: "blockchain"
+          connection: "https://audit-blockchain.company.com"
+          immutable: true
+          
+      # Data privacy and protection
+      privacyConfig:
+        enablePIIDetection: true
+        enableDataMasking: true
+        enableRightToBeForgotten: true
+        enableDataPortability: true
+        
+        # PII detection patterns
+        piiPatterns:
+          - name: "SSN"
+            pattern: "\\b\\d{3}-\\d{2}-\\d{4}\\b"
+            classification: "PII"
+            compliance: ["GDPR", "CCPA"]
+            
+          - name: "CreditCard"
+            pattern: "\\b(?:\\d{4}[- ]?){3}\\d{4}\\b"
+            classification: "FINANCIAL"
+            compliance: ["PCI-DSS", "SOX"]
+            
+          - name: "HealthRecord"
+            pattern: "\\b[A-Z]{2}\\d{8}\\b"
+            classification: "PHI"
+            compliance: ["HIPAA"]
+        
+        # Data retention policies
+        retentionPolicies:
+          - dataType: "PII"
+            retentionPeriod: "P7Y"  # 7 years
+            autoDelete: true
+            compliance: ["GDPR"]
+            
+          - dataType: "FINANCIAL"
+            retentionPeriod: "P10Y"  # 10 years
+            autoDelete: false
+            compliance: ["SOX"]
+            
+          - dataType: "HEALTHCARE"
+            retentionPeriod: "P6Y"  # 6 years
+            autoDelete: true
+            compliance: ["HIPAA"]
+
+---
+# =============================================================================
+# EXAMPLE 14: PRODUCTION-READY RBAC IMPLEMENTATION
+# =============================================================================
+# Complete production-ready RBAC setup with all security features
+source:
+  type: custom-s3
+  serviceName: "production-rbac-s3"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        # Production security configuration
+        securityProtocol: "instance_profile"
+        awsRegion: "us-west-2"
+        bucketName: "production-secure-lake"
+        
+        # VPC Endpoint for security
+        endPointURL: "https://vpce-1234567-abcd1234.s3.us-west-2.vpce.amazonaws.com"
+        forcePathStyle: true
+        useSSL: true
+        verifySSL: true
+        
+        # Production file formats
+        file_formats: "parquet,avro,orc"
+        enable_partition_parsing: "true"
+        enable_data_profiling: "true"
+        enable_metrics: "true"
+        
+        # Production performance settings
+        max_workers: "8"
+        connection_timeout: "60"
+        read_timeout: "120"
+        profiling_batch_size: "10000"
+        
+        # Production path patterns
+        include_path_pattern: "^(prod|production)/"
+        exclude_path_pattern: "/(temp|test|dev|staging)/"
+        
+        # Production tagging strategy
+        tag_mapping: |
+          prod:Environment.Production,Tier.Gold;
+          critical:Priority.Critical,SLA.High;
+          regulated:Compliance.Regulated,Audit.Required;
+          encrypted:Security.Encrypted,Protection.High;
+          monitored:Monitoring.Active,Alerting.Enabled;
+          backed_up:Backup.Daily,Recovery.Enabled
+        default_tags: "Source.S3,Environment.Production,Security.Maximum,Compliance.Full"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "oidc"
+    securityConfig:
+      clientId: "${PROD_OIDC_CLIENT_ID}"
+      clientSecret: "${PROD_OIDC_CLIENT_SECRET}"
+      issuer: "https://auth.company.com"
+      
+      # Production security headers
+      customHeaders:
+        "X-Environment": "production"
+        "X-Security-Level": "maximum"
+        "X-Compliance": "full"
+        
+  # Production RBAC Implementation
+  rbacConfig:
+    # Production role hierarchy
+    roleHierarchy:
+      - level: 1
+        roles: ["GlobalAdmin", "SecurityAdmin", "ComplianceAdmin"]
+        scope: "Global"
+        permissions: ["*"]
+        
+      - level: 2  
+        roles: ["DomainOwner", "DataArchitect", "SecurityOfficer"]
+        scope: "Domain"
+        permissions: ["Domain.*", "Governance.*"]
+        
+      - level: 3
+        roles: ["TeamLead", "DataSteward", "QualityManager"]
+        scope: "Team"
+        permissions: ["Team.*", "Quality.*"]
+        
+      - level: 4
+        roles: ["DataEngineer", "DataAnalyst", "DataScientist"]
+        scope: "Project"
+        permissions: ["Project.*", "Data.*"]
+        
+      - level: 5
+        roles: ["BusinessUser", "DataConsumer", "ReportViewer"]
+        scope: "Resource"
+        permissions: ["View.*", "Query.*"]
+    
+    # Production access policies
+    accessPolicies:
+      production:
+        # High-privilege roles
+        - roles: ["GlobalAdmin", "SecurityAdmin"]
+          permissions: ["*"]
+          resources: ["*"]
+          conditions:
+            requireMFA: true
+            ipWhitelist: ["10.0.0.0/8"]
+            timeRestriction: "none"
+            sessionTimeout: "4h"
+            auditLevel: "MAXIMUM"
+            
+        # Domain-level access
+        - roles: ["DomainOwner", "DataSteward"]
+          permissions: ["View", "Edit", "Create", "ManageLineage", "ManageQuality"]
+          resources: ["domain:${user.domain}.*"]
+          conditions:
+            requireMFA: true
+            businessHours: true
+            sessionTimeout: "8h"
+            auditLevel: "HIGH"
+            
+        # Analyst access
+        - roles: ["DataAnalyst", "DataScientist"]
+          permissions: ["View", "Query", "Export", "CreateDashboard"]
+          resources: ["project:${user.projects}.*"]
+          conditions:
+            businessHours: true
+            maxQueryRows: 100000
+            sessionTimeout: "6h"
+            auditLevel: "MEDIUM"
+            
+        # Consumer access
+        - roles: ["BusinessUser", "DataConsumer"]
+          permissions: ["View", "Query", "ViewDashboard"]
+          resources: ["public.*", "shared.*"]
+          conditions:
+            businessHours: true
+            maxQueryRows: 10000
+            sessionTimeout: "4h"
+            auditLevel: "STANDARD"
+    
+    # Security controls
+    securityControls:
+      authentication:
+        mfaRequired: true
+        sessionTimeout: "4h"
+        maxConcurrentSessions: 3
+        passwordPolicy: "strong"
+        
+      authorization:
+        principleOfLeastPrivilege: true
+        regularAccessReviews: true
+        automaticRoleExpiration: true
+        emergencyAccess: true
+        
+      monitoring:
+        realTimeAlerting: true
+        behaviorAnalytics: true
+        anomalyDetection: true
+        threatDetection: true
+        
+      compliance:
+        dataGovernance: true
+        privacyProtection: true
+        auditCompliance: true
+        regulatoryReporting: true
