@@ -1,0 +1,188 @@
+version: '3.8'
+
+services:
+  # OpenMetadata Server with S3 Connector
+  openmetadata-server:
+    image: openmetadata/server:1.3.1
+    container_name: openmetadata-server
+    depends_on:
+      - mysql
+      - elasticsearch
+    ports:
+      - "8585:8585"
+      - "8586:8586"
+    volumes:
+      # Configuration
+      - ./conf/openmetadata.yaml:/opt/openmetadata/conf/openmetadata.yaml
+      - ./conf/connectors:/opt/openmetadata/conf/connectors
+      
+      # Assets and static files
+      - connector-assets:/opt/openmetadata/static/assets/connectors
+      
+      # Logs
+      - openmetadata-logs:/opt/openmetadata/logs
+      
+      # Optional: Mount source for development
+      # - ../../:/workspace/s3-connector:ro
+    
+    environment:
+      # OpenMetadata Configuration
+      - OPENMETADATA_CLUSTER_NAME=openmetadata
+      - DB_DRIVER_CLASS=com.mysql.cj.jdbc.Driver
+      - DB_SCHEME=mysql
+      - DB_USE_SSL=false
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USER=openmetadata_user
+      - DB_USER_PASSWORD=openmetadata_password
+      - DB_DATABASE=openmetadata_db
+      
+      # Elasticsearch Configuration
+      - ELASTICSEARCH_HOST=elasticsearch
+      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_SCHEME=http
+      - ELASTICSEARCH_USERNAME=
+      - ELASTICSEARCH_PASSWORD=
+      
+      # S3 Connector Specific
+      - CONNECTOR_S3_ENABLED=true
+      - PYTHONPATH=/opt/openmetadata/python:/workspace/s3-connector/src
+      
+      # Authentication
+      - AUTHORIZER_CLASS_NAME=org.openmetadata.service.security.DefaultAuthorizer
+      - AUTHORIZER_REQUEST_FILTER=org.openmetadata.service.security.JwtFilter
+      - AUTHORIZER_ADMIN_PRINCIPALS=[admin]
+      - AUTHORIZER_INGESTION_PRINCIPALS=[ingestion-bot]
+      - AUTHORIZER_PRINCIPAL_DOMAIN=open-metadata.org
+      
+      # JWT Configuration
+      - AUTHENTICATION_PROVIDER=basic
+      - CUSTOM_OIDC_AUTHENTICATION_PROVIDER_NAME=
+      - AUTHENTICATION_PUBLIC_KEYS=[http://localhost:8585/api/v1/system/config/jwks]
+      - AUTHENTICATION_AUTHORITY=https://accounts.google.com
+      - AUTHENTICATION_CLIENT_ID=
+      - AUTHENTICATION_CALLBACK_URL=
+    
+    # Custom command to install S3 connector on startup
+    command: >
+      bash -c "
+        echo '🚀 Starting OpenMetadata with S3 Connector...'
+        
+        # Install S3 connector if not already installed
+        if ! pip show openmetadata-s3-connector &>/dev/null; then
+          echo '📦 Installing S3 Connector...'
+          pip install --upgrade pip
+          pip install openmetadata-s3-connector
+          echo '✅ S3 Connector installed'
+        else
+          echo '✅ S3 Connector already installed'
+        fi
+        
+        # Verify installation
+        python -c 'from om_s3_connector.core.s3_connector import S3Source; print(\"✅ S3 Connector import successful\")'
+        
+        # Start OpenMetadata
+        exec /opt/openmetadata/bin/openmetadata-server-start.sh
+      "
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8585/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    
+    restart: unless-stopped
+    
+    networks:
+      - openmetadata-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: openmetadata-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD=password
+      MYSQL_DATABASE=openmetadata_db
+      MYSQL_USER=openmetadata_user
+      MYSQL_PASSWORD=openmetadata_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./conf/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    networks:
+      - openmetadata-network
+
+  # Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
+    container_name: openmetadata-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1024m -Xmx1024m
+      - xpack.security.enabled=false
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: unless-stopped
+    networks:
+      - openmetadata-network
+
+  # S3 Connector Hot Deploy Service (Optional)
+  s3-connector-deployer:
+    image: python:3.10-slim
+    container_name: s3-connector-deployer
+    volumes:
+      - ../../:/workspace/s3-connector:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    working_dir: /workspace/s3-connector
+    depends_on:
+      - openmetadata-server
+    command: >
+      bash -c "
+        echo '🔥 S3 Connector Hot Deploy Service'
+        apt-get update && apt-get install -y docker.io curl
+        
+        # Wait for OpenMetadata to be ready
+        echo '⏳ Waiting for OpenMetadata to be ready...'
+        while ! curl -f http://openmetadata-server:8585/api/v1/health &>/dev/null; do
+          sleep 10
+        done
+        
+        echo '✅ OpenMetadata is ready'
+        echo '🔄 Hot deploying S3 connector...'
+        
+        # Build and deploy
+        python setup.py sdist bdist_wheel
+        
+        # Copy to OpenMetadata container
+        docker cp dist/openmetadata-s3-connector-*.whl openmetadata-server:/tmp/
+        docker cp deployment/docker-hotdeploy/install-connector.sh openmetadata-server:/tmp/
+        
+        # Install in container
+        docker exec openmetadata-server bash /tmp/install-connector.sh
+        
+        echo '🎉 Hot deployment completed!'
+        
+        # Keep container running for manual deployments
+        tail -f /dev/null
+      "
+    restart: unless-stopped
+    networks:
+      - openmetadata-network
+    profiles:
+      - hot-deploy
+
+volumes:
+  mysql-data:
+  elasticsearch-data:
+  openmetadata-logs:
+  connector-assets:
+
+networks:
+  openmetadata-network:
+    driver: bridge
