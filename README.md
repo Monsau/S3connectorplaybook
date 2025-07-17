@@ -1,229 +1,208 @@
------
+# OpenMetadata S3 Connector
 
-# Custom S3/MinIO Connector for OpenMetadata
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-This project contains a custom, feature-rich connector for OpenMetadata designed to ingest metadata from S3-compatible object storage services, including AWS S3 and MinIO.
+A production-ready connector that ingests metadata from S3-compatible storage into OpenMetadata.
 
------
+## Architecture Overview
 
-## Key Features
-
-  - **Automatic File Discovery**: Scans a specified S3/MinIO bucket to find and process data files based on configurable extensions.
-  - **Intelligent Partition Handling**: Automatically detects Hive-style partitioned data (e.g., `/region=FR/date=2025-06-30/`) and groups multiple physical files into a single logical table in OpenMetadata.
-  - **Flexible Schema Inference**: Parses file content and infers the table schema for multiple formats, including `CSV`, `JSON`, `Parquet`, and `TSV`.
-  - **Autonomous Metadata Ingestion**: Directly handles the entire lifecycle of metadata creation in OpenMetadata, including services, databases (buckets), schemas (folders), and tables.
-  - **Sample Data Ingestion**: Ingests a preview of the data (the first 50 rows) for each table, making it immediately explorable in the OpenMetadata UI.
-  - **Configurable Auto-Tagging**: Automates data governance by applying predefined tags to tables based on path keywords or setting default tags for all ingested assets.
-
------
-
-## Project Structure
-
+```mermaid
+graph TB
+    subgraph "S3/MinIO Storage"
+        S3[🗄️ S3 Bucket]
+        Files[📄 Data Files<br/>CSV, JSON, Parquet, etc.]
+        Partitions[🗂️ Partitioned Data<br/>region=US/year=2024/]
+    end
+    
+    subgraph "OpenMetadata S3 Connector"
+        Disco[🔍 File Discovery]
+        Parse[🧩 Format Detection]
+        Schema[📊 Schema Inference]
+        Part[🗃️ Partition Grouping]
+    end
+    
+    subgraph "OpenMetadata Platform"
+        API[🔌 OpenMetadata API]
+        UI[👁️ Web Interface]
+        Meta[🏷️ Metadata Store]
+    end
+    
+    S3 --> Disco
+    Files --> Parse
+    Partitions --> Part
+    
+    Disco --> Parse
+    Parse --> Schema
+    Schema --> Part
+    Part --> API
+    
+    API --> Meta
+    API --> UI
+    
+    style S3 fill:#e1f5fe
+    style API fill:#e8f5e8
+    style UI fill:#f3e5f5
 ```
-/
-├── connectors/
-│   └── s3/
-│       ├── __init__.py
-│       ├── s3_connector.py          # Main source connector logic
-│       ├── connector.py             # S3 client helper class
-│       └── parsers/                 # Directory for file format parsers
-│           ├── __init__.py
-│           ├── base_parser.py
-│           ├── factory.py
-│           ├── csv_parser.py
-│           ├── json_parser.py
-│           ├── parquet_parser.py
-│           └── tsv_parser.py
-│
-└── playbooks/
-    └── ingestion.yaml               # Workflow configuration file
+
+## Features
+
+- **Multi-format support**: 15+ file formats (CSV, JSON, Parquet, Avro, ORC, Excel, Delta, etc.)
+- **Smart partitioning**: Hive-style partition detection and logical table grouping
+- **Sample data**: Preview data directly in OpenMetadata
+- **Auto-tagging**: Rule-based tagging for data governance
+- **Enterprise ready**: Multiple authentication methods and scalable architecture
+
+## Supported File Formats
+
+```mermaid
+mindmap
+  root((File Formats))
+    Text
+      CSV
+      TSV
+      JSON
+      JSONL
+    Columnar
+      Parquet
+      ORC
+      Avro
+      Feather
+    Office
+      Excel
+      XLSX
+    Scientific
+      HDF5
+      Pickle
+    Modern
+      Delta Lake
 ```
 
------
+## Quick Start
 
-## Usage
+### Installation
 
-### 1\. Prerequisites
+```bash
+git clone <repository-url>
+cd openmetadata-s3-connector
+pip install -r requirements.txt
+pip install -e .
+```
 
-  - Python 3.8+
-  - `openmetadata-ingestion` package installed (`pip install "openmetadata-ingestion[pandas]" boto3 faker tqdm`).
-  - Ensure that all directories within the `connectors` path contain an `__init__.py` file (which can be empty). This is required for Python to recognize them as packages.
+### Configuration
 
-### 2\. Configuration
-
-Edit the `playbooks/ingestion.yaml` file to match your S3/MinIO credentials and desired connector behavior.
+Create your configuration file:
 
 ```yaml
 source:
   type: customDatabase
-  serviceName: minio-storage # The display name for your service in OpenMetadata
+  serviceName: "my-s3-datalake"
   serviceConnection:
     config:
       type: CustomDatabase
-      # Python import path to the main connector class
-      sourcePythonClass: connectors.s3.s3_connector.S3Source
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
       connectionOptions:
-        # S3/MinIO Connection Details
         awsAccessKeyId: "YOUR_ACCESS_KEY"
         awsSecretAccessKey: "YOUR_SECRET_KEY"
         awsRegion: "us-east-1"
-        endPointURL: "http://minio:9000"
-        bucketName: "your-bucket-name"
-
-        # --- Custom Connector Configuration ---
-        # Comma-separated string of file extensions to ingest
-        file_formats: "csv,json,parquet,tsv"
-        # Set to "true" to enable partition discovery, "false" otherwise
-        enable_partition_parsing: "true"
-        # Rule-based tagging. Format: "keyword1:TagFQN1;keyword2:TagFQN2"
-        # IMPORTANT: Tags must exist in your OpenMetadata instance beforehand.
-        tag_mapping: "users:PII.Sensitive;events:Application.Events"
-        # Default tags to apply to all tables. Format: "TagFQN1,TagFQN2"
-        default_tags: "Tier.Bronze"
+        endPointURL: "http://localhost:9000"  # For MinIO
+        bucketName: "my-bucket"
+        file_formats: "csv,json,parquet"
 
 sink:
   type: metadata-rest
   config: {}
 
 workflowConfig:
-  loggerLevel: INFO # Can be set to DEBUG for more verbose output
   openMetadataServerConfig:
-    hostPort: http://localhost:8585/api
-    authProvider: openmetadata
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
     securityConfig:
       jwtToken: "YOUR_JWT_TOKEN"
 ```
 
-### 3\. Running the Ingestion
-
-> **Important:** Run the following commands from the root directory of your project.
-
-#### On Linux / macOS
+### Run Ingestion
 
 ```bash
-export PYTHONPATH="."
-metadata ingest -c playbooks/ingestion.yaml
+export PYTHONPATH=$(pwd)/src
+metadata ingest -c config/my-config.yaml
 ```
+## Configuration Options
 
-#### On Windows (PowerShell)
+| Option | Description | Default |
+|--------|-------------|---------|
+| `bucketName` | S3 bucket to scan | Required |
+| `file_formats` | Comma-separated file extensions | `csv,json,parquet` |
+| `enable_partition_parsing` | Detect Hive partitions | `true` |
+| `max_sample_rows` | Sample data rows | `100` |
 
-```powershell
-$env:PYTHONPATH = "."
-metadata ingest -c playbooks/ingestion.yaml
-```
-
-#### On Windows (Command Prompt)
-
-```cmd
-set PYTHONPATH=.
-metadata ingest -c playbooks/ingestion.yaml
-```
-
------
-
-## Docker Build (Optional)
-
-To build a self-contained Docker image that includes the `openmetadata-ingestion` client and your custom connector code, you can use a `Dockerfile`. This simplifies deployment in containerized environments.
+## Docker Usage
 
 ```bash
-docker build -t openmetadata-ingestion-custom:latest .
+docker build -t s3-connector .
+docker run --rm -v $(pwd)/config:/app/config s3-connector
 ```
 
------
+## Ingestion Workflow
 
-## Troubleshooting
-
-  - **`ModuleNotFoundError: No module named 'connectors'`**
-    This is the most common issue and is almost always caused by one of the following:
-      - You did not run the `metadata ingest` command from the root directory of the project.
-      - The `PYTHONPATH` environment variable was not set correctly before running the command.
-      - A folder in the import path (e.g., `connectors` or `connectors/s3`) is missing its `__init__.py` file.
-
-## About `S3Source`
-
-The `S3Source` class (see `connectors/s3/s3_connector.py`) implements the main logic for:
-
-* Connecting to S3/MinIO using credentials from the YAML config
-
-* Discovering and grouping files
-
-* Inferring schema and sample data
-
-* Tagging tables based on path rules
-
-* Creating/updating OpenMetadata entities
-
-See the code for detailed comments and extension points.
-
-## Contact
-
-For any questions or inquiries, please contact me:
-
-* **Email**: `mfonsau@talentys.eu`
-
-* **LinkedIn**: `https://www.linkedin.com/in/mustapha-fonsau/`
-
------
-
-## Version Control & Git Usage
-
-This project is git-ready. To start tracking your code and configuration changes:
-
-```powershell
-# Initialize a new git repository (run in your project root)
-git init
-# Add all files
-git add .
-# Commit your initial project state
-git commit -m "Initial commit: add OpenMetadata S3 connector and configs"
+```mermaid
+sequenceDiagram
+    participant User
+    participant Connector
+    participant S3
+    participant OpenMetadata
+    
+    User->>Connector: Start Ingestion
+    Connector->>S3: Connect & Authenticate
+    S3->>Connector: Connection Established
+    
+    loop For each file
+        Connector->>S3: List Files
+        S3->>Connector: File Metadata
+        Connector->>S3: Download Sample
+        S3->>Connector: Sample Data
+        Connector->>Connector: Infer Schema
+        Connector->>OpenMetadata: Create Table Entity
+    end
+    
+    Connector->>User: Ingestion Complete
+    
+    Note over OpenMetadata: Data available in UI
 ```
 
-(Optional) To connect to a remote repository:
-```powershell
-git remote add origin https://github.com/your-username/your-repo.git
-git push -u origin master
+## Testing
+
+```bash
+python -m pytest tests/
+python -c "from om_s3_connector import S3Source; print('✅ Import successful')"
 ```
 
-### Recommended `.gitignore`
-Create a `.gitignore` file in your project root with:
+## Documentation
 
-```
-# Python
-__pycache__/
-*.pyc
-.env
-*.env
-*.log
-# Jupyter
-.ipynb_checkpoints/
-# OS
-.DS_Store
-Thumbs.db
-# OpenMetadata
-openmetadata-logs/
-```
+- 📖 **[Complete Documentation](docs/)** - Comprehensive documentation index
+- 🚀 **[Quick Start Guide](docs/user-guides/quick-start.md)** - Get started in 5 minutes
+- ⚙️ **[Configuration Guide](docs/user-guides/configuration.md)** - Detailed configuration options
+- 🏗️ **[Architecture Overview](docs/developer-guides/architecture.md)** - System design and components
+- 🚀 **[Deployment Guide](docs/deployment/deployment-guide.md)** - Production deployment scenarios
+- 🔧 **[Troubleshooting](docs/user-guides/troubleshooting.md)** - Common issues and solutions
+- � **[Supported Formats](docs/reference/supported-formats.md)** - Complete file format matrix
 
-**Never commit real credentials or JWT tokens to git.** Use `.env` files and add them to `.gitignore`.
+### For Developers
+- 🧩 **[Adding File Formats](docs/developer-guides/adding-formats.md)** - Extend format support
+- 🗂️ **[Hierarchical Folders](docs/reference/hierarchical-folders.md)** - Advanced partitioning
+- 📚 **[API Reference](docs/reference/api-reference.md)** - Complete API documentation
 
------
+## Contributing
 
-## Playbook & Token Management
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Commit changes: `git commit -m 'Add new feature'`
+4. Push and create a Pull Request
 
-- The main workflow config is in `playbooks/ingestion.yaml`.
-- Update the `jwtToken` field with a valid token for your OpenMetadata instance.
-- If you change credentials or tokens, restart your ingestion process.
+## License
 
------
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## Troubleshooting JWT Token Errors
+---
 
-If you see errors like:
-
-```
-Not Authorized! Token verification failed. Public key mismatch. due to com.auth0.jwt.exceptions.SignatureVerificationException
-```
-
-- Ensure your JWT token is generated for your current OpenMetadata server and is not expired.
-- See the main project documentation or ask your admin for a valid token.
-
------
+**Author**: Mustapha Fonsau ([mfonsau@talentys.eu](mailto:mfonsau@talentys.eu))

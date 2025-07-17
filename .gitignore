@@ -1,27 +1,143 @@
-# Ignore Python virtual environments
-venv/
-
-# Ignore Python cache files
+# Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 
-# Ignore Jupyter Notebook checkpoints
-.ipynb_checkpoints/
+# C extensions
+*.so
 
-# Ignore environment and config files
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# Environments
 .env
-.env.*
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# Ignore data and contract files
+# OpenMetadata specific
+openmetadata-logs/
+*.jwt
+*.token
+
+# AWS credentials (security)
+.aws/
+aws-credentials
+.boto
+
+# Environment files
+*.env
+.env.*
+config.ini
+secrets.yaml
+credentials.json
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+temp/
+tmp/
+
+# Logs
+*.log
+logs/
+
+# Data files (avoid committing sensitive data)
+data/
+*.csv
+*.json
+*.parquet
+*.avro
+*.orc
+*.feather
+*.h5
+*.hdf5
+*.pkl
+*.pickle
+*.xlsx
+*.xls
+
+# Test outputs
+test-output/
+test-data/
+sample-data/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Local configuration overrides
+config/local.yaml
+config/*-local.yaml
+playbooks/local-*.yaml
+
+# Legacy files
 wind-farm.json
 contract.json
 contract.yaml
-
-# Ignore OS files
-.DS_Store
-Thumbs.db
-
-# Ignore logs
-*.log

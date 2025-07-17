@@ -1,16 +1,24 @@
 # Use the official OpenMetadata ingestion image for your version as the base
 FROM openmetadata/openmetadata-ingestion:1.8.0
 
+# Set working directory
+WORKDIR /app
+
 # The base image runs as the 'airflow' user.
 # It's good practice to switch to this user to ensure correct permissions.
 USER airflow
 
-# Copy your custom connectors directory into the image.
-# This makes your custom code available in the Python path.
-COPY --chown=airflow:airflow connectors/ /opt/airflow/dags/connectors/
+# Copy the new source structure
+COPY --chown=airflow:airflow src/ /app/src/
+COPY --chown=airflow:airflow config/ /app/config/
+COPY --chown=airflow:airflow requirements.txt setup.py /app/
 
-# Copy your requirements file
-COPY --chown=airflow:airflow requirements.txt .
+# Set Python path to include src directory
+ENV PYTHONPATH="/app/src:${PYTHONPATH}"
 
-# Install the additional Python packages required by your connector
-RUN pip install -r requirements.txt
+# Install the package and dependencies
+RUN pip install -e . && \
+    pip install -r requirements.txt
+
+# Set default command
+CMD ["metadata", "ingest", "-c", "config/ingestion.yaml"]

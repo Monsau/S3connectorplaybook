@@ -1,0 +1,190 @@
+# Enhanced ingestion configuration with security support
+# This example shows various authentication methods
+
+# Example 1: Access Key Authentication (MinIO/S3 Compatible)
+source:
+  type: s3
+  serviceName: S3DataLake
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: s3.s3_connector.S3Source
+      connectionOptions:
+        # Connection settings
+        awsRegion: us-east-1
+        endPointURL: http://minio:9000  # For MinIO, leave empty for AWS S3
+        bucketName: data-lake-bucket
+        
+        # Security Configuration - Access Key Method
+        securityProtocol: access_key
+        awsAccessKeyId: your-access-key-id
+        awsSecretAccessKey: your-secret-access-key
+        
+        # Connector Settings
+        file_formats: "csv,json,parquet,tsv,orc,avro"
+        enable_partition_parsing: "true"
+        sample_size: "100"
+        
+        # Path Filtering (optional)
+        includePathPattern: ".*\\/data\\/.*"  # Only include paths containing "/data/"
+        excludePathPattern: ".*\\/temp\\/.*"  # Exclude paths containing "/temp/"
+        
+        # Tagging Configuration
+        tag_mapping: "users:PII.Sensitive;events:Application.Events;orders:Commerce.Orders"
+        default_tags: "Tier.Bronze,Source.S3"
+        
+        # Performance Settings
+        maxWorkers: "4"
+        connectionTimeout: "30"
+        readTimeout: "60"
+        
+        # Advanced Options
+        enableMetrics: "true"
+        enableDataProfiling: "false"
+        profilingBatchSize: "1000"
+
+  sourceConfig:
+    config:
+      type: StorageMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: http://localhost:8585/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: "your-jwt-token-here"
+
+---
+
+# Example 2: IAM Role Authentication (AWS S3)
+source:
+  type: s3
+  serviceName: AWS_S3_DataLake
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: s3.s3_connector.S3Source
+      connectionOptions:
+        # Connection settings
+        awsRegion: us-west-2
+        bucketName: production-data-lake
+        
+        # Security Configuration - IAM Role Method
+        securityProtocol: iam_role
+        roleArn: "arn:aws:iam::123456789012:role/OpenMetadataS3Role"
+        roleSessionName: "openmetadata-ingestion"
+        externalId: "unique-external-id"  # Optional
+        
+        # Connector Settings
+        file_formats: "parquet,json,csv"
+        enable_partition_parsing: "true"
+        sample_size: "50"
+        
+        # Default tags for all tables
+        default_tags: "Tier.Gold,Source.AWS_S3,Environment.Production"
+
+  sourceConfig:
+    config:
+      type: StorageMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: http://localhost:8585/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: "your-jwt-token-here"
+
+---
+
+# Example 3: STS Token Authentication (Temporary Credentials)
+source:
+  type: s3
+  serviceName: S3_TempAccess
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: s3.s3_connector.S3Source
+      connectionOptions:
+        # Connection settings
+        awsRegion: eu-west-1
+        bucketName: staging-data-bucket
+        
+        # Security Configuration - STS Token Method
+        securityProtocol: sts_token
+        awsAccessKeyId: "ASIATEMP123456789"
+        awsSecretAccessKey: "temp-secret-key"
+        awsSessionToken: "temporary-session-token"
+        
+        # Connector Settings
+        file_formats: "csv,json"
+        enable_partition_parsing: "false"
+        sample_size: "25"
+
+  sourceConfig:
+    config:
+      type: StorageMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: DEBUG
+  openMetadataServerConfig:
+    hostPort: http://localhost:8585/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: "your-jwt-token-here"
+
+---
+
+# Example 4: AWS Profile Authentication
+source:
+  type: s3
+  serviceName: S3_ProfileBased
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: s3.s3_connector.S3Source
+      connectionOptions:
+        # Connection settings
+        awsRegion: us-east-1
+        bucketName: analytics-data
+        
+        # Security Configuration - AWS Profile Method
+        securityProtocol: aws_iam
+        profileName: "openmetadata-profile"  # AWS profile from ~/.aws/credentials
+        
+        # Connector Settings
+        file_formats: "parquet,orc"
+        enable_partition_parsing: "true"
+        sample_size: "100"
+        
+        # Advanced filtering
+        includePathPattern: "year=202[3-4].*"  # Only include data from 2023-2024
+
+  sourceConfig:
+    config:
+      type: StorageMetadata
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: http://localhost:8585/api
+    authProvider: openmetadata
+    securityConfig:
+      jwtToken: "your-jwt-token-here"

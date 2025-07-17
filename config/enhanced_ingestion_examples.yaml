@@ -1,0 +1,256 @@
+# Enhanced S3 Connector Configuration Examples
+# This file contains various configuration examples for different scenarios
+
+# =============================================================================
+# BASIC AWS S3 CONFIGURATION
+# =============================================================================
+---
+# Example 1: Basic AWS S3 with Access Keys
+source:
+  type: custom-s3
+  serviceName: "aws-s3-datalake"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsAccessKeyId: "AKIA..."
+        awsSecretAccessKey: "..."
+        awsRegion: "us-west-2"
+        bucketName: "my-data-lake"
+        file_formats: "csv,json,parquet,avro,orc"
+        enable_partition_parsing: "true"
+        tag_mapping: "pii:PII.PersonalData;financial:Finance.Sensitive"
+        default_tags: "Source.S3,Tier.Bronze"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_JWT_TOKEN"
+
+---
+# =============================================================================
+# MINIO CONFIGURATION
+# =============================================================================
+# Example 2: MinIO with Development Settings
+source:
+  type: custom-s3
+  serviceName: "minio-dev-storage"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsAccessKeyId: "minioadmin"
+        awsSecretAccessKey: "minioadmin"
+        awsRegion: "us-east-1"
+        endPointURL: "http://localhost:9000"
+        bucketName: "development-data"
+        file_formats: "csv,json,parquet,excel,feather"
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "2"
+        max_sample_rows: "50"
+        tag_mapping: "dev:Environment.Development;test:DataQuality.Test"
+        default_tags: "Environment.Dev,Source.MinIO"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: DEBUG
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_JWT_TOKEN"
+
+---
+# =============================================================================
+# ENTERPRISE CONFIGURATION
+# =============================================================================
+# Example 3: Enterprise AWS S3 with IAM Roles
+source:
+  type: custom-s3
+  serviceName: "enterprise-s3-lake"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsRegion: "us-west-2"
+        roleArn: "arn:aws:iam::123456789012:role/OpenMetadataS3Role"
+        bucketName: "enterprise-data-lake"
+        file_formats: "parquet,avro,orc,delta,feather"
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "1"
+        include_path_pattern: "^(production|staging)/"
+        exclude_path_pattern: "/(temp|archive|backup)/"
+        max_sample_rows: "1000"
+        enable_data_profiling: "true"
+        profiling_batch_size: "5000"
+        tag_mapping: |
+          production:Environment.Production;
+          staging:Environment.Staging;
+          pii:PII.PersonalData;
+          financial:Finance.CriticalData;
+          public:Classification.Public;
+          internal:Classification.Internal
+        default_tags: "Source.S3,Governance.Managed"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "https://openmetadata.company.com/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_PRODUCTION_JWT_TOKEN"
+
+---
+# =============================================================================
+# MULTI-FORMAT CONFIGURATION
+# =============================================================================
+# Example 4: All Supported Formats
+source:
+  type: custom-s3
+  serviceName: "multi-format-storage"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsAccessKeyId: "YOUR_ACCESS_KEY"
+        awsSecretAccessKey: "YOUR_SECRET_KEY"
+        awsRegion: "us-east-1"
+        endPointURL: "http://minio:9000"
+        bucketName: "multi-format-data"
+        # All supported formats
+        file_formats: "csv,tsv,json,jsonl,parquet,avro,orc,excel,feather,hdf5,pickle,delta"
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "2"
+        include_subfolder_info: "true"
+        max_sample_rows: "200"
+        enable_metrics: "true"
+        tag_mapping: |
+          csv:Format.CSV;
+          json:Format.JSON;
+          parquet:Format.Parquet;
+          avro:Format.Avro;
+          orc:Format.ORC;
+          excel:Format.Excel;
+          scientific:DataType.Scientific;
+          ml:DataType.MachineLearning
+        default_tags: "Source.S3,Format.Mixed"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_JWT_TOKEN"
+
+---
+# =============================================================================
+# HIGH-PERFORMANCE CONFIGURATION
+# =============================================================================
+# Example 5: High-Performance Setup for Large Data Lakes
+source:
+  type: custom-s3
+  serviceName: "high-perf-datalake"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsAccessKeyId: "YOUR_ACCESS_KEY"
+        awsSecretAccessKey: "YOUR_SECRET_KEY"
+        awsRegion: "us-west-2"
+        bucketName: "big-data-lake"
+        file_formats: "parquet,avro,orc,delta"  # Only high-performance formats
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "true"
+        folder_depth_for_tables: "1"
+        max_sample_rows: "500"
+        max_workers: "8"  # Parallel processing
+        connection_timeout: "60"
+        read_timeout: "120"
+        enable_metrics: "true"
+        enable_data_profiling: "true"
+        profiling_batch_size: "10000"
+        include_path_pattern: "^data/(current|recent)/"
+        exclude_path_pattern: "/(archive|temp|staging)/"
+        tag_mapping: |
+          current:Freshness.Current;
+          recent:Freshness.Recent;
+          large:Size.Large;
+          critical:Priority.Critical
+        default_tags: "Source.S3,Performance.Optimized,Scale.Large"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_JWT_TOKEN"
+
+---
+# =============================================================================
+# DEVELOPMENT AND TESTING CONFIGURATION
+# =============================================================================
+# Example 6: Development Environment with Debugging
+source:
+  type: custom-s3
+  serviceName: "dev-test-storage"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      connectionOptions:
+        awsAccessKeyId: "minioadmin"
+        awsSecretAccessKey: "minioadmin"
+        awsRegion: "us-east-1"
+        endPointURL: "http://localhost:9000"
+        bucketName: "test-bucket"
+        file_formats: "csv,json,parquet"  # Limited for testing
+        enable_partition_parsing: "true"
+        enable_hierarchical_folders: "false"  # Simpler structure for testing
+        max_sample_rows: "10"  # Small samples for quick testing
+        enable_metrics: "true"
+        tag_mapping: "test:Environment.Test;sample:DataQuality.Sample"
+        default_tags: "Environment.Development,Source.Test"
+
+sink:
+  type: metadata-rest
+  config: {}
+
+workflowConfig:
+  loggerLevel: DEBUG  # Verbose logging for development
+  openMetadataServerConfig:
+    hostPort: "http://localhost:8585/api"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "YOUR_DEV_JWT_TOKEN"
