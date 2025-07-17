@@ -108,8 +108,7 @@ S3connectorplaybook/
 ├── 📁 scripts/                      # Build and utility scripts
 ├── 📁 examples/                     # Usage examples
 ├── 📁 docs/                         # Documentation
-├── 📁 deployment/                   # Deployment resources
-└── 📁 airflow/                      # Airflow integration
+└── 📁 deployment/                   # Deployment resources
 ```
 
 ## 🔧 Updated Components

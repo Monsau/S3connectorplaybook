@@ -198,11 +198,9 @@ S3connectorplaybook/
 ├── 📁 playbooks/                     # Configuration templates
 │   ├── 📄 ingestion.yaml            # 🔧 Main workflow config
 │   └── 📄 enhanced_ingestion_examples.yaml
-├── 📁 airflow/                       # Airflow integration
-│   ├── 📁 dags/
-│   └── 📁 templates/
 ├── 📁 deployment/                    # Deployment resources
 │   ├── 📄 kubernetes-manifest.yaml  # ☸️ Kubernetes deployment
+│   ├── 📁 docker-hotdeploy/         # 🐳 Hot deployment scripts
 │   └── 📁 artifacts/
 ├── 📁 tests/                         # Test suite
 │   └── 📄 test_connector.py
