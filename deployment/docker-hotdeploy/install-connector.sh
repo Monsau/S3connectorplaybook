@@ -114,7 +114,7 @@ cat > /opt/openmetadata/conf/connectors/s3-connector.json << 'EOF'
   "python_module": "om_s3_connector.core.s3_connector",
   "className": "S3Source",
   "iconPath": "assets/connectors/s3/s3-connector-icon.svg",
-  "version": "2.0.0",
+  "version": "0.9",
   "author": "Mustapha Fonsau",
   "license": "MIT"
 }

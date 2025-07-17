@@ -1,0 +1,37 @@
+source:
+  type: s3
+  serviceName: s3-manual-connector
+  serviceConnection:
+    config:
+      type: S3
+      awsAccessKeyId: "${AWS_ACCESS_KEY_ID:-your-access-key}"
+      awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY:-your-secret-key}"
+      awsRegion: "${AWS_REGION:-us-east-1}"
+      endPointURL: "${S3_ENDPOINT_URL:-http://localhost:9000}"  # MinIO URL
+      verifySSL: ${S3_VERIFY_SSL:-true}
+      bucketName: "${S3_BUCKET_NAME:-your-bucket}"
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+      includeViews: true
+      includeTags: true
+      includeOwners: true
+      markDeletedTables: true
+      tableFilterPattern:
+        includes:
+          - ".*\\.csv$"
+          - ".*\\.parquet$"
+          - ".*\\.json$"
+        excludes:
+          - ".*\\.tmp$"
+sink:
+  type: metadata-rest
+  config:
+    openMetadataServerConfig:
+      hostPort: http://localhost:8585/api
+      authProvider: no-auth
+workflowConfig:
+  loggerLevel: INFO
+  openMetadataServerConfig:
+    hostPort: http://localhost:8585/api
+    authProvider: no-auth

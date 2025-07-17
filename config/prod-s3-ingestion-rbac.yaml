@@ -1,0 +1,141 @@
+# Production S3 Ingestion Configuration with RBAC
+# This configuration uses IAM roles and enhanced security
+
+source:
+  type: s3
+  serviceName: s3-prod-connector
+  serviceConnection:
+    config:
+      type: S3
+      # Use IAM role instead of access keys (recommended)
+      awsConfig:
+        awsRegion: "${AWS_REGION:-us-west-2}"
+        assumeRoleArn: "${AWS_ASSUME_ROLE_ARN:-arn:aws:iam::123456789012:role/OpenMetadata-S3-Role}"
+        assumeRoleExternalId: "${AWS_EXTERNAL_ID:-unique-external-id}"
+        assumeRoleSessionName: "openmetadata-s3-ingestion"
+      
+      # Alternative: Use access keys with session token
+      # awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+      # awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+      # awsSessionToken: "${AWS_SESSION_TOKEN}"
+      
+      # S3 Configuration
+      bucketName: "${S3_BUCKET_NAME:-prod-data-bucket}"
+      endPointURL: "${S3_ENDPOINT_URL:-}"  # Empty for AWS S3
+      
+      # Security Settings
+      verifySSL: true
+      customCACertPath: "${CUSTOM_CA_CERT_PATH:-}"
+      
+      # Connection Configuration
+      connectionConfig:
+        timeout: 30
+        maxRetries: 3
+        retryMode: "adaptive"
+        useSSL: true
+        
+      # Access Control
+      allowedRegions:
+        - "us-west-2"
+        - "us-east-1"
+      
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+      includeViews: true
+      includeTags: true
+      includeOwners: true
+      markDeletedTables: true
+      
+      # File filtering with security considerations
+      tableFilterPattern:
+        includes:
+          # Only process specific file types
+          - "data/.*\\.csv$"
+          - "data/.*\\.parquet$"
+          - "processed/.*\\.json$"
+          # Include files with specific tags
+          - ".*\\.(?=.*sensitive)(?=.*approved).*$"
+        excludes:
+          # Exclude sensitive directories
+          - ".*/pii/.*"
+          - ".*/backup/.*"
+          - ".*/temp/.*"
+          - ".*\\.tmp$"
+          - ".*\\.log$"
+          # Exclude files larger than 1GB for initial scan
+          - ".*\\.(?=.*large).*$"
+      
+      # Metadata extraction limits
+      processingConfig:
+        maxFilesPerBatch: 100
+        maxFileSizeBytes: 1073741824  # 1GB
+        skipLargeFiles: true
+        
+      # Data sampling configuration
+      profileSample: 10000
+      profileQuery: "SELECT * FROM {table} LIMIT 10000"
+      
+      # Compliance settings
+      enableDataClassification: true
+      enablePIIDetection: true
+      piiDetectionRules:
+        - "email"
+        - "ssn"
+        - "credit_card"
+        - "phone_number"
+
+sink:
+  type: metadata-rest
+  config:
+    openMetadataServerConfig:
+      hostPort: "${OPENMETADATA_HOST_PORT:-http://localhost:8585/api}"
+      authProvider: "${OPENMETADATA_AUTH_PROVIDER:-no-auth}"
+      # For JWT authentication
+      # jwtToken: "${OPENMETADATA_JWT_TOKEN}"
+      # For Basic authentication
+      # username: "${OPENMETADATA_USERNAME}"
+      # password: "${OPENMETADATA_PASSWORD}"
+      
+      # SSL Configuration for OpenMetadata
+      verifySSL: "${OPENMETADATA_VERIFY_SSL:-true}"
+      sslConfig:
+        certificatePath: "${OPENMETADATA_SSL_CERT_PATH:-}"
+        
+      # Security headers
+      securityConfig:
+        enableCORS: true
+        allowedOrigins: 
+          - "https://openmetadata.company.com"
+        apiTimeout: 30
+
+workflowConfig:
+  loggerLevel: "${LOG_LEVEL:-INFO}"
+  enableDebugLog: false
+  
+  # OpenMetadata server configuration
+  openMetadataServerConfig:
+    hostPort: "${OPENMETADATA_HOST_PORT:-http://localhost:8585/api}"
+    authProvider: "${OPENMETADATA_AUTH_PROVIDER:-no-auth}"
+    
+  # Workflow execution settings
+  workflowTimeout: 3600  # 1 hour timeout
+  maxRetries: 3
+  retryDelay: 30
+  
+  # Resource limits
+  resourceLimits:
+    memory: "2Gi"
+    cpu: "1000m"
+    
+  # Monitoring and alerting
+  monitoring:
+    enableMetrics: true
+    metricsPort: 9090
+    healthCheckPort: 8080
+    
+  # Audit configuration
+  auditConfig:
+    enableAuditLog: true
+    auditLogPath: "/var/log/openmetadata/s3-ingestion-audit.log"
+    retentionDays: 90

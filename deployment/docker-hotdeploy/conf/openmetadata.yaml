@@ -1,0 +1,103 @@
+# OpenMetadata Server Configuration
+server:
+  type: simple
+  rootPath: "/api/*"
+  applicationConnectors:
+    - type: http
+      port: 8585
+  adminConnectors:
+    - type: http
+      port: 8586
+  requestLog:
+    type: file
+    timeZone: UTC
+    currentLogFilename: ./logs/access.log
+    archivedLogFilenamePattern: ./logs/access-%d.log.gz
+    archivedFileCount: 5
+
+# Database Configuration
+database:
+  driverClass: com.mysql.cj.jdbc.Driver
+  user: openmetadata_user
+  password: openmetadata_password
+  url: jdbc:mysql://mysql:3306/openmetadata_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+
+# Elasticsearch Configuration
+elasticsearch:
+  host: elasticsearch
+  port: 9200
+  scheme: http
+  username: ""
+  password: ""
+  truststorePath: ""
+  truststorePassword: ""
+  connectionTimeoutSecs: 5
+  socketTimeoutSecs: 60
+  keepAliveTimeoutSecs: 600
+  batchSize: 10
+
+# Auth Configuration
+authenticationConfiguration:
+  provider: "basic"
+  publicKeyUrls:
+    - "http://localhost:8585/api/v1/system/config/jwks"
+  authority: "https://localhost:8585"
+  clientId: "open-metadata"
+  callbackUrl: "http://localhost:8585/callback"
+
+authorizerConfiguration:
+  className: "org.openmetadata.service.security.DefaultAuthorizer"
+  containerRequestFilter: "org.openmetadata.service.security.JwtFilter"
+  initialAdmins:
+    - "admin"
+  botPrincipals:
+    - "ingestion-bot"
+  principalDomain: "open-metadata.org"
+
+# JWT Configuration
+jwtTokenConfiguration:
+  rsapublicKeyFilePath: "./conf/public_key.der"
+  rsaprivateKeyFilePath: "./conf/private_key.der"
+  jwtissuer: "open-metadata.org"
+  keyId: "Gb389a-9f76-gdjs-a92j-0242bk94356"
+
+# Pipeline Service Client Configuration
+pipelineServiceClientConfiguration:
+  className: "org.openmetadata.service.clients.pipeline.airflow.AirflowRESTClient"
+  apiEndpoint: "http://ingestion:8080"
+  username: "admin"
+  password: "admin"
+  metadataApiEndpoint: "http://openmetadata-server:8585/api"
+  verifySSL: false
+  sslConfig:
+    validate: false
+
+# Event Handler Configuration
+eventHandlerConfiguration:
+  eventHandlerClassNames:
+    - "org.openmetadata.service.events.AuditEventHandler"
+    - "org.openmetadata.service.events.ChangeEventHandler"
+
+# Health Check
+health:
+  delayedShutdownHandlerEnabled: true
+  shutdownWaitPeriod: 1s
+  healthCheckUrlPaths: ["/api/v1/health-check"]
+  healthChecks:
+    - name: "OpenMetadataServerHealthCheck"
+      className: "org.openmetadata.service.health.OpenMetadataServerHealthCheck"
+
+# Logging
+logging:
+  level: INFO
+  loggers:
+    org.openmetadata.service: DEBUG
+    io.dropwizard: INFO
+  appenders:
+    - type: file
+      threshold: ALL
+      logFormat: "[%d{ISO8601}] [%thread] %-5level %logger{36} - %msg%n"
+      currentLogFilename: ./logs/openmetadata.log
+      archivedLogFilenamePattern: ./logs/openmetadata-%d.log.gz
+      archivedFileCount: 5
+      maxFileSize: 50MB

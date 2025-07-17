@@ -16,7 +16,9 @@
 **✅ **Production-Ready**: Fully tested, documented, and deployed in enterprise environments  
 **✅ **18+ File Formats**: Complete support for all major data formats with extensible parser architecture  
 **✅ **Enterprise Security**: Comprehensive RBAC, multi-factor authentication, and compliance features  
-**✅ **Deployment Ready**: Docker, Kubernetes, and cloud deployment configurations included
+**✅ **Manual Ingestion**: Complete UI-bypass workflow with RBAC/IAM/PII compliance support  
+**✅ **Hot Deployment**: Zero-downtime installation into existing OpenMetadata Docker containers  
+**✅ **Security Validation**: Automated RBAC testing and security compliance verification
 
 ---
 
@@ -25,7 +27,8 @@
 - [🎯 Overview & Architecture](#-overview--architecture)
 - [✨ Key Features](#-key-features)
 - [🚀 Quick Start (5 Minutes)](#-quick-start-5-minutes)
-- [📚 Step-by-Step Implementation Guide](#-step-by-step-implementation-guide)
+- [� Manual Ingestion & RBAC](#-manual-ingestion--rbac)
+- [�📚 Step-by-Step Implementation Guide](#-step-by-step-implementation-guide)
 - [🔐 Security & Authentication](#-security--authentication)
 - [🏗️ Production Deployment](#️-production-deployment)
 - [📖 Complete Documentation Index](#-complete-documentation-index)
@@ -122,9 +125,11 @@ graph TB
 - **High Performance**: Parallel processing with configurable worker threads
 - **Scalable Architecture**: Kubernetes-native with IRSA and service mesh support
 - **Enterprise Integration**: API Gateway, cross-account access, federated authentication
+- **Manual Ingestion**: Complete UI-bypass workflow with automated RBAC/IAM validation
+- **Security Testing**: Automated scripts for RBAC, IAM, and compliance verification
+- **Hot Deployment**: Zero-downtime installation in existing Docker containers
 - **Comprehensive Monitoring**: Real-time alerting, behavior analytics, threat detection
 - **Custom Branding**: Dedicated connector icons for professional OpenMetadata integration
-- **Hot Deployment**: Zero-downtime installation in existing Docker containers
 
 ### 📊 **Data Governance**
 - **Auto-Tagging**: Rule-based tagging for classification and compliance
@@ -146,7 +151,15 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### Step 2: Basic Configuration
+### Step 2: Choose Installation Method
+
+| Method | Use Case | Time | Features |
+|--------|----------|------|----------|
+| **Basic Setup** | Development | 5 min | Standard ingestion |
+| **[Manual Ingestion](#-manual-ingestion--rbac)** | Enterprise | 15 min | RBAC, PII, Compliance |
+| **[Hot Deploy](deployment/docker-hotdeploy/)** | Existing OpenMetadata | 10 min | Zero-downtime |
+
+### Step 3: Basic Configuration
 ```yaml
 # config/basic-setup.yaml
 source:
@@ -171,16 +184,201 @@ workflowConfig:
       jwtToken: "${OPENMETADATA_JWT_TOKEN}"
 ```
 
-### Step 3: Run Your First Ingestion
+### Step 4: Run Your First Ingestion
 ```bash
 export PYTHONPATH=$(pwd)/src
 metadata ingest -c config/basic-setup.yaml
 ```
 
-### Step 4: Verify Results
+### Step 5: Verify Results
 Visit your OpenMetadata instance at `http://localhost:8585` to see the ingested metadata!
 
+**🎯 For Production**: Use our [Manual Ingestion workflow](#-manual-ingestion--rbac) with RBAC/IAM validation  
+**🐳 For Existing OpenMetadata**: Use [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) for zero-downtime installation
+
+**➡️ Complete Installation Guide**: [📖 INSTALLATION.md](INSTALLATION.md) - Comprehensive setup for all scenarios  
+**📋 Installation Checklist**: [✅ INSTALLATION_CHECKLIST.md](INSTALLATION_CHECKLIST.md) - Step-by-step verification guide
+
 **➡️ Detailed Setup**: [🚀 Quick Start Guide](docs/user-guides/quick-start.md)
+
+---
+
+## 🔐 Manual Ingestion & RBAC
+
+### Enterprise-Grade Manual Ingestion Workflow
+
+**🎯 Complete UI-bypass solution** for enterprise environments requiring programmatic control, advanced RBAC, and compliance validation.
+
+```mermaid
+graph TB
+    subgraph "🔧 Manual Ingestion Workflow"
+        Config[⚙️ RBAC Configuration] --> Validate[🔍 Security Validation]
+        Validate --> Connect[🔗 S3 Connection Test]
+        Connect --> Ingest[📊 Data Ingestion]
+        Ingest --> Verify[✅ Results Validation]
+    end
+    
+    subgraph "🔐 Security Features"
+        IAM[🎭 IAM Role Validation]
+        PII[🛡️ PII Compliance]
+        Audit[📋 Audit Logging]
+        RBAC[👥 Role-Based Access]
+    end
+    
+    subgraph "🎯 Production Scripts"
+        ConnTest[🧪 test-s3-connection.sh]
+        RBACTest[🔒 test-rbac-security.sh]
+        ManualRun[🚀 run-manual-ingestion.sh]
+        HealthCheck[💚 health-check.sh]
+    end
+    
+    Config --> IAM
+    Validate --> PII
+    Connect --> Audit
+    Ingest --> RBAC
+    
+    IAM --> ConnTest
+    PII --> RBACTest
+    RBAC --> ManualRun
+    Audit --> HealthCheck
+    
+    style Config fill:#e8f5e8
+    style Validate fill:#fff3e0
+    style Connect fill:#e3f2fd
+    style Ingest fill:#f3e5f5
+    style Verify fill:#e1f5fe
+```
+
+### 🚀 Quick Manual Ingestion Setup
+
+#### 1. Configure Environment
+```bash
+# Copy and customize environment template
+cp config/.env.example config/.env
+# Edit with your credentials (IAM roles recommended)
+nano config/.env
+```
+
+#### 2. Test S3 Connectivity & RBAC
+```bash
+# Basic S3 connection validation
+./scripts/test-s3-connection.sh
+
+# Advanced RBAC and IAM validation
+./scripts/test-rbac-security.sh
+```
+
+#### 3. Run Manual Ingestion
+```bash
+# Execute full ingestion workflow
+./scripts/run-manual-ingestion.sh
+
+# With custom configuration
+./scripts/run-manual-ingestion.sh config/prod-s3-ingestion-rbac.yaml
+```
+
+### 🔧 Configuration Templates
+
+#### Basic Manual Ingestion (`config/manual-s3-ingestion.yaml`)
+```yaml
+source:
+  type: custom-s3
+  serviceName: "manual-s3-ingestion"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: connectors.s3.s3_connector.S3Source
+      connectionOptions:
+        # Environment-based credentials (recommended)
+        awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+        awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+        awsRegion: "${AWS_REGION:-us-east-1}"
+        bucketName: "${S3_BUCKET_NAME}"
+        
+        # Manual ingestion specific settings
+        enable_manual_mode: true
+        bypass_ui_validation: true
+        enable_detailed_logging: true
+```
+
+#### Production RBAC Configuration (`config/prod-s3-ingestion-rbac.yaml`)
+```yaml
+source:
+  type: custom-s3
+  serviceName: "production-s3-rbac"
+  serviceConnection:
+    config:
+      type: CustomDatabase
+      sourcePythonClass: connectors.s3.s3_connector.S3Source
+      connectionOptions:
+        # Production IAM configuration
+        useAwsCredentials: true
+        awsRegion: "${AWS_REGION}"
+        bucketName: "${S3_BUCKET_NAME}"
+        
+        # RBAC and security settings
+        enableRBAC: true
+        rbacValidation: "strict"
+        auditLevel: "comprehensive"
+        
+        # PII and compliance
+        enablePIIDetection: true
+        complianceFramework: ["GDPR", "SOX", "HIPAA"]
+        dataClassification: "automatic"
+        
+        # Performance and reliability
+        maxWorkerThreads: 8
+        enableRetry: true
+        maxRetries: 3
+        timeoutSeconds: 300
+```
+
+### 🛡️ Security Validation Scripts
+
+#### S3 Connection Testing (`scripts/test-s3-connection.sh`)
+- **Basic connectivity validation**
+- **Credential verification**
+- **Bucket access permissions**
+- **SSL/TLS validation**
+
+#### RBAC Security Testing (`scripts/test-rbac-security.sh`)
+- **IAM role validation**
+- **Cross-account access testing**
+- **Permission boundary verification**
+- **PII compliance checking**
+- **Audit trail validation**
+
+#### Manual Ingestion Runner (`scripts/run-manual-ingestion.sh`)
+- **Pre-flight security checks**
+- **Configuration validation**
+- **Parallel processing orchestration**
+- **Error handling and recovery**
+- **Results verification**
+
+### 📋 Security Compliance Features
+
+| Security Feature | Manual Config | RBAC Config | Description |
+|------------------|---------------|-------------|-------------|
+| **IAM Integration** | Optional | ✅ Required | AWS IAM role validation and STS token management |
+| **PII Detection** | Disabled | ✅ Enabled | Automatic detection and tagging of sensitive data |
+| **Audit Logging** | Basic | ✅ Comprehensive | Immutable audit trails for compliance |
+| **RBAC Validation** | None | ✅ Strict | Role-based access control with dynamic validation |
+| **Cross-Account** | Not supported | ✅ Enabled | Multi-account S3 access with proper IAM chains |
+| **Data Classification** | Manual | ✅ Automatic | Auto-tagging based on content analysis |
+
+### 🔗 Complete Manual Ingestion Documentation
+
+- **📖 [Manual Ingestion Guide](docs/MANUAL_INGESTION.md)** - Complete setup and configuration guide
+- **🔒 [Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation checklist
+- **⚙️ [Configuration Examples](config/)** - Ready-to-use configuration templates
+- **🧪 [Testing Scripts](scripts/)** - Automated validation and testing tools
+
+**🎯 Why Manual Ingestion?**
+- **Enterprise Control**: Programmatic ingestion without UI dependencies
+- **Advanced RBAC**: Complex role hierarchies and permission validation
+- **Compliance Ready**: Built-in PII detection and audit trails
+- **Automation Friendly**: Perfect for CI/CD and scheduled workflows
+- **Security First**: Comprehensive IAM and security validation
 
 ---
 
@@ -393,6 +591,19 @@ graph TB
 ```bash
 # Deploy to running OpenMetadata container without rebuild
 ./deployment/docker-hotdeploy/hot-deploy.sh
+
+# Verify deployment and package integration
+./deployment/docker-hotdeploy/health-check.sh
+```
+
+### Manual Ingestion with RBAC
+```bash
+# Test connectivity and security
+./scripts/test-s3-connection.sh
+./scripts/test-rbac-security.sh
+
+# Run manual ingestion (bypasses UI)
+./scripts/run-manual-ingestion.sh config/prod-s3-ingestion-rbac.yaml
 ```
 
 ### Full Stack with Docker Compose
@@ -406,9 +617,14 @@ docker-compose up -d
 ```bash
 # Run comprehensive health check
 ./deployment/docker-hotdeploy/health-check.sh
+
+# Validate manual ingestion capabilities
+./scripts/test-s3-connection.sh
+./scripts/test-rbac-security.sh
 ```
 
-**🐳 Complete Docker Guide**: [🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)
+**🐳 Complete Docker Guide**: [🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)  
+**🔐 Manual Ingestion Guide**: [📖 Manual Ingestion](docs/MANUAL_INGESTION.md)
 
 ---
 
@@ -458,34 +674,68 @@ graph TD
 ### Production-Ready Configuration
 
 ```yaml
-# Production configuration example
+# Production configuration with RBAC and manual ingestion
 source:
   type: custom-s3
   serviceName: "production-s3-connector"
   serviceConnection:
     config:
       type: CustomDatabase
-      sourcePythonClass: om_s3_connector.core.s3_connector.S3Source
+      sourcePythonClass: connectors.s3.s3_connector.S3Source
       connectionOptions:
         # Security: Use IAM roles instead of access keys
+        useAwsCredentials: true
         awsRegion: "${AWS_REGION}"
         bucketName: "${S3_BUCKET_NAME}"
         
+        # RBAC and Security Features
+        enableRBAC: true
+        rbacValidation: "strict"
+        enablePIIDetection: true
+        complianceFramework: ["GDPR", "SOX", "HIPAA"]
+        auditLevel: "comprehensive"
+        
+        # Manual Ingestion Support
+        enableManualMode: true
+        bypassUIValidation: true
+        enableDetailedLogging: true
+        
         # Performance: Enable parallel processing
-        max_worker_threads: 10
-        batch_size: 1000
+        maxWorkerThreads: 10
+        batchSize: 1000
         
         # Reliability: Configure retries and timeouts
-        max_retries: 3
-        request_timeout: 300
-        
-        # Monitoring: Enable detailed logging
-        log_level: "INFO"
-        enable_metrics: true
+        enableRetry: true
+        maxRetries: 3
+        timeoutSeconds: 300
         
         # Security: TLS and encryption
-        use_ssl: true
-        verify_ssl: true
+        useSSL: true
+        verifySSL: true
+        enableEncryption: true
+
+# Manual ingestion workflow configuration
+workflowConfig:
+  openMetadataServerConfig:
+    hostPort: "${OPENMETADATA_HOST_PORT}"
+    authProvider: "openmetadata"
+    securityConfig:
+      jwtToken: "${OPENMETADATA_JWT_TOKEN}"
+    
+  # Advanced security configuration
+  securityConfig:
+    enableSSL: true
+    sslConfig:
+      caCertPath: "/opt/certs/ca.crt"
+      certPath: "/opt/certs/client.crt"
+      keyPath: "/opt/certs/client.key"
+    
+  # Audit and compliance settings
+  auditConfig:
+    enableAuditLog: true
+    auditLogLevel: "INFO"
+    auditOutputPath: "/var/log/openmetadata/audit.log"
+    enableComplianceValidation: true
 ```
 
 **🔗 Production Deployment**: [🚀 Deployment Guide](docs/deployment/deployment-guide.md)
@@ -498,10 +748,10 @@ source:
 
 | User Profile | Primary Resources | Advanced Topics |
 |--------------|-------------------|-----------------|
-| **👨‍💻 Data Engineers** | [Quick Start](docs/user-guides/quick-start.md) • [Configuration](docs/user-guides/configuration.md) | [Architecture](docs/developer-guides/architecture.md) • [Production](docs/deployment/deployment-guide.md) |
-| **👨‍💼 Data Stewards** | [Security Guide](docs/reference/security-authentication.md) • [RBAC Setup](docs/reference/security-authentication.md#rbac-configuration) | [Compliance](docs/reference/security-authentication.md#compliance-frameworks) • [Audit](docs/reference/security-authentication.md#audit-logging) |
-| **📊 Data Analysts** | [Supported Formats](docs/reference/supported-formats.md) • [Troubleshooting](docs/user-guides/troubleshooting.md) | [Hierarchical Data](docs/reference/hierarchical-folders.md) • [Data Quality](docs/user-guides/configuration.md#data-quality) |
-| **🔧 DevOps Engineers** | [Deployment Guide](docs/deployment/deployment-guide.md) • [Architecture](docs/developer-guides/architecture.md) | [Kubernetes](docs/deployment/deployment-guide.md#kubernetes-deployment) • [Monitoring](docs/deployment/deployment-guide.md#monitoring-alerting) |
+| **👨‍💻 Data Engineers** | [Quick Start](docs/user-guides/quick-start.md) • [Manual Ingestion](docs/MANUAL_INGESTION.md) | [Architecture](docs/developer-guides/architecture.md) • [Production](docs/deployment/deployment-guide.md) |
+| **👨‍💼 Data Stewards** | [Security Guide](docs/reference/security-authentication.md) • [RBAC Setup](docs/MANUAL_INGESTION.md#rbac-configuration) | [Security Checklist](docs/SECURITY_CHECKLIST.md) • [Compliance](docs/reference/security-authentication.md#compliance-frameworks) |
+| **📊 Data Analysts** | [Supported Formats](docs/reference/supported-formats.md) • [Manual Workflows](docs/MANUAL_INGESTION.md) | [Hierarchical Data](docs/reference/hierarchical-folders.md) • [Data Quality](docs/user-guides/configuration.md#data-quality) |
+| **🔧 DevOps Engineers** | [Hot Deploy](deployment/docker-hotdeploy/) • [Security Scripts](scripts/) | [Kubernetes](docs/deployment/deployment-guide.md#kubernetes-deployment) • [Monitoring](docs/deployment/deployment-guide.md#monitoring-alerting) |
 | **👩‍💻 Developers** | [Adding Formats](docs/developer-guides/adding-formats.md) • [Architecture](docs/developer-guides/architecture.md) | [API Reference](docs/reference/) • [Contributing](docs/developer-guides/adding-formats.md#contributing) |
 
 ### 📚 **Documentation Structure**
@@ -544,7 +794,9 @@ graph TD
 
 #### 📖 **User Documentation**
 - **[🚀 Quick Start Guide](docs/user-guides/quick-start.md)** - Get started in 5 minutes
-- **[📚 Comprehensive Guide](docs/user-guides/comprehensive-guide.md)** - Complete implementation walkthrough
+- **[� Manual Ingestion Guide](docs/MANUAL_INGESTION.md)** - Complete UI-bypass workflow with RBAC/IAM
+- **[🔒 Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation and compliance
+- **[�📚 Comprehensive Guide](docs/user-guides/comprehensive-guide.md)** - Complete implementation walkthrough
 - **[⚙️ Configuration Guide](docs/user-guides/configuration.md)** - Detailed configuration options and examples
 - **[🎨 Icon Integration](docs/user-guides/icon-integration.md)** - Custom connector icons for OpenMetadata
 - **[🔧 Troubleshooting](docs/user-guides/troubleshooting.md)** - Common issues and solutions
@@ -556,6 +808,8 @@ graph TD
 #### 🚀 **Deployment & Operations**
 - **[📋 Deployment Guide](docs/deployment/deployment-guide.md)** - Production deployment scenarios and best practices
 - **[🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)** - Zero-downtime deployment to existing OpenMetadata containers
+- **[🔧 Manual Ingestion Scripts](scripts/)** - Automated RBAC/IAM validation and manual ingestion workflows
+- **[⚙️ Configuration Templates](config/)** - Production-ready configuration examples with RBAC
 
 #### 📚 **Reference Documentation**
 - **[📊 Supported Formats Matrix](docs/reference/supported-formats.md)** - Complete file format support with features and examples
@@ -624,6 +878,15 @@ python validate_parsers.py
 # Integration test with real S3
 python simple_test.py
 
+# Manual ingestion and security testing
+./scripts/test-s3-connection.sh           # Basic S3 connectivity
+./scripts/test-rbac-security.sh           # Advanced RBAC/IAM validation
+./scripts/run-manual-ingestion.sh         # Full manual ingestion workflow
+
+# Hot deployment testing
+./deployment/docker-hotdeploy/hot-deploy.sh   # Deploy to existing container
+./deployment/docker-hotdeploy/health-check.sh # Verify deployment
+
 # Performance testing
 python -m pytest tests/test_performance.py --benchmark-only
 ```
@@ -649,12 +912,30 @@ test:
     test_authentication: true
     test_rbac: true
     test_ssl: true
+    test_iam_validation: true
+    test_pii_detection: true
+    test_audit_logging: true
+    
+  manual_ingestion_tests:
+    test_ui_bypass: true
+    test_rbac_workflow: true
+    test_compliance_validation: true
     
   performance_thresholds:
     max_processing_time: 300  # seconds
     max_memory_usage: "2GB"
     min_throughput: "100MB/s"
 ```
+
+### Security Testing Features
+
+| Test Type | Script | Description | Coverage |
+|-----------|--------|-------------|----------|
+| **Basic Connectivity** | `test-s3-connection.sh` | S3 access, credentials, bucket permissions | ✅ SSL, IAM, Cross-account |
+| **RBAC Validation** | `test-rbac-security.sh` | Role-based access control, IAM policies | ✅ Dynamic roles, Permission boundaries |
+| **Manual Ingestion** | `run-manual-ingestion.sh` | Full UI-bypass workflow testing | ✅ RBAC, PII detection, Audit trails |
+| **Hot Deployment** | `health-check.sh` | Package integration verification | ✅ Container health, Import validation |
+| **Compliance** | Built into RBAC script | GDPR, SOX, HIPAA validation | ✅ Data classification, Audit logs |
 
 **🔗 Testing Documentation**: [🧪 Testing Guide](docs/user-guides/testing.md)
 
@@ -753,3 +1034,9 @@ This project builds upon the excellent OpenMetadata framework and integrates wit
 ---
 
 *🚀 **Ready to get started?** Jump to our [Quick Start Guide](docs/user-guides/quick-start.md) and have your S3 data ingested into OpenMetadata in under 5 minutes!*
+
+*🔐 **Need enterprise-grade RBAC?** Check out our [Manual Ingestion Guide](docs/MANUAL_INGESTION.md) for complete UI-bypass workflows with advanced security validation!*
+
+*🐳 **Already have OpenMetadata running?** Use our [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) script for zero-downtime installation!*
+
+*📋 **Want step-by-step guidance?** Follow our [Installation Checklist](INSTALLATION_CHECKLIST.md) to ensure every step is completed successfully!*

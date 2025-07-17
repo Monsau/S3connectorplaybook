@@ -18,7 +18,7 @@ from collections import defaultdict
 from ..parsers.factory import ParserFactory
 from .config import S3ConnectionConfig, S3SecurityConfig, SecurityProtocol
 from .security import S3SecurityManager
-from connectors.s3.connector import S3Connector
+from .connector import S3Connector
 
 # --- OpenMetadata Imports ---
 from metadata.generated.schema.entity.services.databaseService import DatabaseService, DatabaseConnection

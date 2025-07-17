@@ -15,13 +15,24 @@ PARSER_MAPPING: Dict[str, Type[FileParser]] = {
     "tsv": TsvParser,
 }
 
+class ParserFactory:
+    """Factory class for creating file parsers"""
+    
+    @staticmethod
+    def get_parser(file_format: str) -> Optional[FileParser]:
+        """
+        Factory function that returns an instance of the appropriate parser
+        for a given file format. Returns None if the format is not supported.
+        """
+        parser_class = PARSER_MAPPING.get(file_format.lower())
+        if parser_class:
+            # Create and return an instance of the parser class
+            return parser_class()
+        return None
+
 def get_parser(file_format: str) -> Optional[FileParser]:
     """
     Factory function that returns an instance of the appropriate parser
     for a given file format. Returns None if the format is not supported.
     """
-    parser_class = PARSER_MAPPING.get(file_format.lower())
-    if parser_class:
-        # Create and return an instance of the parser class
-        return parser_class()
-    return None
+    return ParserFactory.get_parser(file_format)

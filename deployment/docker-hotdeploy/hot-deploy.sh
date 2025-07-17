@@ -49,14 +49,14 @@ fi
 
 # Check if container is running
 print_status "Checking if OpenMetadata container is running..."
-if docker ps --format "{{.Names}}" | grep -q "$SERVICE_NAME"; then
+if sudo docker ps --format "{{.Names}}" | grep -q "$SERVICE_NAME"; then
     print_success "Container $SERVICE_NAME is running"
-elif docker-compose ps "$SERVICE_NAME" 2>/dev/null | grep -q "Up"; then
+elif sudo docker-compose ps "$SERVICE_NAME" 2>/dev/null | grep -q "Up"; then
     print_success "Container $SERVICE_NAME is running (via docker-compose)"
 else
     print_error "Container $SERVICE_NAME is not running"
     echo "Available containers:"
-    docker ps --format "table {{.Names}}\t{{.Status}}"
+    sudo docker ps --format "table {{.Names}}\t{{.Status}}"
     exit 1
 fi
 
@@ -65,26 +65,26 @@ print_status "Building package..."
 rm -rf dist/ build/ *.egg-info/
 python setup.py sdist bdist_wheel
 
-if [[ ! -f "dist/${PACKAGE_NAME}"-*.whl ]]; then
+if [[ ! -f "dist/openmetadata_s3_connector"-*.whl ]]; then
     print_error "Wheel package not created"
     exit 1
 fi
 
-WHEEL_FILE=$(ls dist/${PACKAGE_NAME}-*.whl | head -1)
+WHEEL_FILE=$(ls dist/openmetadata_s3_connector-*.whl | head -1)
 print_success "Package built: $WHEEL_FILE"
 
 # Copy package to container
 print_status "Copying package to container..."
-CONTAINER_ID=$(docker ps --filter "name=$SERVICE_NAME" --format "{{.ID}}" | head -1)
+CONTAINER_ID=$(sudo docker ps --filter "name=$SERVICE_NAME" --format "{{.ID}}" | head -1)
 
 if [[ -z "$CONTAINER_ID" ]]; then
     print_error "Could not find container ID for $SERVICE_NAME"
     exit 1
 fi
 
-docker exec "$CONTAINER_ID" mkdir -p /tmp/connector-install
-docker cp "$WHEEL_FILE" "$CONTAINER_ID:/tmp/connector-install/"
-docker cp "deployment/docker-hotdeploy/install-connector.sh" "$CONTAINER_ID:/tmp/connector-install/"
+sudo docker exec "$CONTAINER_ID" mkdir -p /tmp/connector-install
+sudo docker cp "$WHEEL_FILE" "$CONTAINER_ID:/tmp/connector-install/"
+sudo docker cp "deployment/docker-hotdeploy/install-connector.sh" "$CONTAINER_ID:/tmp/connector-install/"
 
 print_success "Files copied to container"
 
@@ -92,7 +92,7 @@ print_success "Files copied to container"
 print_status "Installing connector in container..."
 WHEEL_FILENAME=$(basename "$WHEEL_FILE")
 
-docker exec "$CONTAINER_ID" bash -c "
+sudo docker exec "$CONTAINER_ID" bash -c "
     cd /tmp/connector-install &&
     pip install --upgrade pip &&
     pip uninstall -y $PACKAGE_NAME 2>/dev/null || true &&
@@ -102,13 +102,13 @@ docker exec "$CONTAINER_ID" bash -c "
 
 # Run the installation script
 print_status "Running connector setup script..."
-docker exec "$CONTAINER_ID" bash /tmp/connector-install/install-connector.sh
+sudo docker exec "$CONTAINER_ID" bash /tmp/connector-install/install-connector.sh
 
 # Copy any additional assets
 print_status "Copying additional assets..."
 if [[ -d "assets" ]]; then
-    docker cp assets/ "$CONTAINER_ID:/tmp/connector-assets/"
-    docker exec "$CONTAINER_ID" bash -c "
+    sudo docker cp assets/ "$CONTAINER_ID:/tmp/connector-assets/"
+    sudo docker exec "$CONTAINER_ID" bash -c "
         mkdir -p /opt/openmetadata/static/assets/connectors/s3/ &&
         cp -r /tmp/connector-assets/* /opt/openmetadata/static/assets/connectors/s3/ 2>/dev/null || true &&
         echo 'Assets copied successfully'
@@ -121,7 +121,7 @@ sleep 10
 
 # Verify installation
 print_status "Verifying installation..."
-docker exec "$CONTAINER_ID" bash -c "
+sudo docker exec "$CONTAINER_ID" bash -c "
     echo 'Checking package installation...'
     pip show $PACKAGE_NAME || exit 1
     
@@ -145,7 +145,7 @@ docker exec "$CONTAINER_ID" bash -c "
 print_status "Checking API availability..."
 sleep 5
 
-API_CHECK=$(docker exec "$CONTAINER_ID" curl -s -o /dev/null -w "%{http_code}" http://localhost:8585/api/v1/health 2>/dev/null || echo "000")
+API_CHECK=$(sudo docker exec "$CONTAINER_ID" curl -s -o /dev/null -w "%{http_code}" http://localhost:8585/api/v1/health 2>/dev/null || echo "000")
 
 if [[ "$API_CHECK" == "200" ]]; then
     print_success "OpenMetadata API is responding (HTTP 200)"
@@ -157,7 +157,7 @@ fi
 
 # Cleanup temporary files
 print_status "Cleaning up temporary files..."
-docker exec "$CONTAINER_ID" rm -rf /tmp/connector-install /tmp/connector-assets
+sudo docker exec "$CONTAINER_ID" rm -rf /tmp/connector-install /tmp/connector-assets
 
 print_success "🎉 Hot deployment completed successfully!"
 echo ""

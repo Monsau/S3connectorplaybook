@@ -37,12 +37,12 @@ echo ""
 
 # Check if container is running
 print_status "Checking container status..."
-CONTAINER_ID=$(docker ps --filter "name=$SERVICE_NAME" --format "{{.ID}}" | head -1)
+CONTAINER_ID=$(sudo docker ps --filter "name=$SERVICE_NAME" --format "{{.ID}}" | head -1)
 
 if [[ -z "$CONTAINER_ID" ]]; then
     print_error "Container $SERVICE_NAME not found or not running"
     echo "Available containers:"
-    docker ps --format "table {{.Names}}\t{{.Status}}"
+    sudo docker ps --format "table {{.Names}}\t{{.Status}}"
     exit 1
 fi
 
@@ -50,19 +50,19 @@ print_success "Container $SERVICE_NAME is running ($CONTAINER_ID)"
 
 # Check package installation
 print_status "Checking package installation..."
-PACKAGE_CHECK=$(docker exec "$CONTAINER_ID" pip show "$PACKAGE_NAME" 2>/dev/null || echo "NOT_FOUND")
+PACKAGE_CHECK=$(sudo sudo docker exec "$CONTAINER_ID" pip show "$PACKAGE_NAME" 2>/dev/null || echo "NOT_FOUND")
 
 if [[ "$PACKAGE_CHECK" == "NOT_FOUND" ]]; then
     print_error "Package $PACKAGE_NAME is not installed"
     exit 1
 else
     print_success "Package $PACKAGE_NAME is installed"
-    echo "$(docker exec "$CONTAINER_ID" pip show "$PACKAGE_NAME" | grep -E "^(Name|Version|Location):")"
+    echo "$(sudo sudo docker exec "$CONTAINER_ID" pip show "$PACKAGE_NAME" | grep -E "^(Name|Version|Location):")"
 fi
 
 # Check connector import
 print_status "Testing connector import..."
-IMPORT_CHECK=$(docker exec "$CONTAINER_ID" python -c "
+IMPORT_CHECK=$(sudo docker exec "$CONTAINER_ID" python -c "
 try:
     from om_s3_connector.core.s3_connector import S3Source
     from openmetadata_ingestion.source.source import Source
@@ -100,7 +100,7 @@ esac
 
 # Check OpenMetadata service status
 print_status "Checking OpenMetadata service status..."
-SERVICE_STATUS=$(docker exec "$CONTAINER_ID" bash -c "
+SERVICE_STATUS=$(sudo docker exec "$CONTAINER_ID" bash -c "
     if command -v supervisorctl &> /dev/null; then
         if supervisorctl status openmetadata 2>/dev/null | grep -q RUNNING; then
             echo 'SUPERVISOR_RUNNING'
@@ -141,7 +141,7 @@ esac
 
 # Check API availability
 print_status "Checking OpenMetadata API..."
-API_CHECK=$(docker exec "$CONTAINER_ID" bash -c "
+API_CHECK=$(sudo docker exec "$CONTAINER_ID" bash -c "
     if command -v curl &> /dev/null; then
         curl -s -o /dev/null -w '%{http_code}' http://localhost:8585/api/v1/health 2>/dev/null || echo '000'
     else
@@ -167,7 +167,7 @@ esac
 
 # Check assets installation
 print_status "Checking connector assets..."
-ASSETS_CHECK=$(docker exec "$CONTAINER_ID" bash -c "
+ASSETS_CHECK=$(sudo docker exec "$CONTAINER_ID" bash -c "
     if [[ -d '/opt/openmetadata/static/assets/connectors/s3' ]]; then
         ls /opt/openmetadata/static/assets/connectors/s3/*.svg 2>/dev/null | wc -l
     else
@@ -177,14 +177,14 @@ ASSETS_CHECK=$(docker exec "$CONTAINER_ID" bash -c "
 
 if [[ "$ASSETS_CHECK" -gt 0 ]]; then
     print_success "Found $ASSETS_CHECK icon assets"
-    docker exec "$CONTAINER_ID" ls -la /opt/openmetadata/static/assets/connectors/s3/
+    sudo docker exec "$CONTAINER_ID" ls -la /opt/openmetadata/static/assets/connectors/s3/
 else
     print_warning "No icon assets found (functionality not affected)"
 fi
 
 # Check connector configuration
 print_status "Checking connector configuration..."
-CONFIG_CHECK=$(docker exec "$CONTAINER_ID" bash -c "
+CONFIG_CHECK=$(sudo docker exec "$CONTAINER_ID" bash -c "
     if [[ -f '/opt/openmetadata/conf/connectors/s3-connector.json' ]]; then
         echo 'CONFIG_FOUND'
     else
@@ -200,7 +200,7 @@ fi
 
 # Check entry points
 print_status "Checking OpenMetadata entry points..."
-ENTRY_POINTS=$(docker exec "$CONTAINER_ID" python -c "
+ENTRY_POINTS=$(sudo docker exec "$CONTAINER_ID" python -c "
 import pkg_resources
 s3_connectors = []
 for ep in pkg_resources.iter_entry_points('openmetadata_sources'):
@@ -218,7 +218,7 @@ fi
 
 # Memory and resource check
 print_status "Checking container resources..."
-MEMORY_INFO=$(docker exec "$CONTAINER_ID" bash -c "
+MEMORY_INFO=$(sudo docker exec "$CONTAINER_ID" bash -c "
     echo 'Memory:'
     free -h | grep -E '^Mem:' || echo 'Memory info not available'
     echo 'Disk:'
@@ -241,8 +241,8 @@ echo ""
 echo "🚀 Your S3 Connector is healthy and ready to use!"
 echo ""
 echo "📱 Quick Actions:"
-echo "  • View logs: docker logs -f $SERVICE_NAME"
+echo "  • View logs: sudo docker logs -f $SERVICE_NAME"
 echo "  • Access UI: http://localhost:8585"
-echo "  • Restart service: docker restart $SERVICE_NAME"
+echo "  • Restart service: sudo docker restart $SERVICE_NAME"
 echo ""
 echo "📚 Documentation: deployment/docker-hotdeploy/README.md"

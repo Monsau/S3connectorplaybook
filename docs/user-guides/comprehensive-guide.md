@@ -582,7 +582,7 @@ connectionOptions:
 docker build -t s3-connector:latest .
 
 # Build with specific OpenMetadata version
-docker build --build-arg OM_VERSION="1.3.0" -t s3-connector:1.3.0 .
+docker build --build-arg OM_VERSION="1.8.1" -t s3-connector:1.8.1 .
 ```
 
 ### Running with Docker
@@ -1441,7 +1441,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔄 Changelog
 
-### Version 2.0.0 (Latest)
+### Version 0.9 (Latest)
 - ✨ Added support for 15+ file formats
 - 🎯 Enhanced partition detection algorithm  
 - 🏷️ Advanced tagging and classification system

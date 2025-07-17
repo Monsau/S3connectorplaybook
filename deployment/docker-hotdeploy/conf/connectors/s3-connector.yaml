@@ -1,0 +1,94 @@
+# S3 Connector Configuration for OpenMetadata
+# This file configures the S3 connector with icon support
+
+connectorType: DatabaseService
+serviceName: s3-connector
+serviceConnection:
+  config:
+    type: CustomDatabase
+    sourcePythonClass: "om_s3_connector.core.connector.S3Connector"
+    connectionOptions:
+      awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+      awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+      awsRegion: "${AWS_REGION:-us-east-1}"
+      bucketName: "${S3_BUCKET_NAME}"
+      prefix: "${S3_PREFIX:-/}"
+      endpointUrl: "${S3_ENDPOINT_URL}" # For MinIO or custom endpoints
+    connectionArguments:
+      # Connector-specific settings
+      maxRetries: 3
+      timeout: 30
+      chunkSize: 1024
+      # Icon configuration
+      icon: "s3-connector-icon.svg"
+      iconPath: "/opt/openmetadata/static/assets/connectors/s3-connector-icon.svg"
+
+# Metadata ingestion configuration
+metadataIngestion:
+  name: s3-metadata-ingestion
+  sourceConfig:
+    config:
+      type: DatabaseMetadata
+      markDeletedTables: true
+      includeTables: true
+      includeViews: false
+      includeTags: true
+      includeOwners: true
+      includeStoredProcedures: false
+      queryLogDuration: 1
+      queryParsingTimeoutLimit: 300
+      useFqnForFiltering: false
+      
+  # Processor configuration (optional)
+  processorConfig:
+    config:
+      tableFilterPattern:
+        includes: [".*"]
+        excludes: ["tmp_.*", "temp_.*"]
+      schemaFilterPattern:
+        includes: [".*"]
+        excludes: ["information_schema.*", "performance_schema.*"]
+
+  # Sink configuration
+  sinkConfig:
+    config:
+      type: metadata-rest
+      api_endpoint: "http://localhost:8585/api"
+
+  # Workflow configuration
+  workflowConfig:
+    loggerLevel: INFO
+    openMetadataServerConfig:
+      hostPort: "http://localhost:8585/api"
+      authProvider: openmetadata
+      securityConfig:
+        jwtToken: "${OM_JWT_TOKEN}"
+
+# Profiler configuration (optional)
+profiler:
+  name: s3-profiler
+  sourceConfig:
+    config:
+      type: Profiler
+      generateSampleData: true
+      profileSample: 100
+      profileSampleType: PERCENTAGE
+      timeoutSeconds: 43200
+      
+  processorConfig:
+    config:
+      profileSample: 85
+      confidence: 95
+      
+  sinkConfig:
+    config:
+      type: metadata-rest
+      api_endpoint: "http://localhost:8585/api"
+
+  workflowConfig:
+    loggerLevel: INFO
+    openMetadataServerConfig:
+      hostPort: "http://localhost:8585/api"
+      authProvider: openmetadata
+      securityConfig:
+        jwtToken: "${OM_JWT_TOKEN}"

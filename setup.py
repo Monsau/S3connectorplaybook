@@ -6,14 +6,19 @@ this_directory = Path(__file__).parent
 long_description = (this_directory / "README.md").read_text(encoding='utf-8')
 
 # Read version from package
-version_file = this_directory / "src" / "om_s3_connector" / "__init__.py"
-version = {}
-with open(version_file) as f:
-    exec(f.read(), version)
+def get_version():
+    version_file = this_directory / "src" / "om_s3_connector" / "__init__.py"
+    with open(version_file) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return line.split('=')[1].strip().strip('"\'')
+    return "0.9"
+
+version = get_version()
 
 setup(
     name="openmetadata-s3-connector",
-    version=version.get("__version__", "2.0.0"),
+    version=version,
     author="Mustapha Fonsau",
     author_email="mfonsau@talentys.eu",
     description="A comprehensive S3/MinIO connector for OpenMetadata",
@@ -27,7 +32,7 @@ setup(
     
     # Dependencies
     install_requires=[
-        "openmetadata-ingestion>=1.3.0",
+        "openmetadata-ingestion==1.8.0",
         "boto3>=1.26.0",
         "pandas>=1.5.0",
         "pyarrow>=10.0.0",

@@ -4,7 +4,7 @@ S3 Connector for OpenMetadata
 A comprehensive connector for ingesting metadata from S3-compatible storage systems.
 """
 
-__version__ = "2.0.0"
+__version__ = "0.9"
 __author__ = "Mustapha Fonsau"
 __email__ = "mfonsau@talentys.eu"
 

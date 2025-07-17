@@ -1,6 +1,34 @@
+# OpenMetadata S3/MinIO Connector Installation Commands
+
+## Basic Installation
 pip install --upgrade pip setuptools
-pip install "openmetadata-ingestion==xxx"
-pip install google-cloud-bigquery
+pip install "openmetadata-ingestion==1.8.1"
+pip install -e .
+
+## Additional Dependencies for Advanced Features
 pip install pandas
 pip install importlib-metadata
-pip install -e .
+pip install google-cloud-bigquery  # For BigQuery integration if needed
+
+## Manual Ingestion Dependencies
+pip install pyyaml>=6.0
+pip install boto3>=1.26.0
+pip install requests>=2.28.0
+
+## Security and RBAC Dependencies
+pip install cryptography>=3.4.8
+pip install pyjwt>=2.4.0
+
+## Hot Deployment
+# No additional dependencies - uses existing OpenMetadata container
+
+## Verification Commands
+# Test basic installation
+python -c "import connectors.s3.s3_connector; print('S3 Connector imported successfully')"
+
+# Test manual ingestion scripts
+./scripts/test-s3-connection.sh --dry-run
+./scripts/test-rbac-security.sh --dry-run
+
+# Test hot deployment
+./deployment/docker-hotdeploy/health-check.sh
