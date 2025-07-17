@@ -75,6 +75,7 @@ graph TD
 |-------|-----------|-------------|
 | **File Formats** | [Supported Formats](reference/supported-formats.md) | Complete format matrix |
 | **Complex Structures** | [Hierarchical Folders](reference/hierarchical-folders.md) | Partition handling |
+| **Security & Auth** | [Security & Authentication](reference/security-authentication.md) | RBAC, authentication methods |
 | **Visualizations** | [Mermaid Diagrams](reference/mermaid-diagrams.md) | All project diagrams |
 | **API** | [API Reference](reference/api-reference.md) | Complete API documentation |
 
