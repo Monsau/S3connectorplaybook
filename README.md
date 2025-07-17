@@ -124,6 +124,7 @@ graph TB
 - **Enterprise Integration**: API Gateway, cross-account access, federated authentication
 - **Comprehensive Monitoring**: Real-time alerting, behavior analytics, threat detection
 - **Custom Branding**: Dedicated connector icons for professional OpenMetadata integration
+- **Hot Deployment**: Zero-downtime installation in existing Docker containers
 
 ### 📊 **Data Governance**
 - **Auto-Tagging**: Rule-based tagging for classification and compliance
@@ -386,6 +387,31 @@ graph TB
 
 ---
 
+## 🐳 **Quick Docker Deployment**
+
+### One-Command Hot Deploy (Existing Container)
+```bash
+# Deploy to running OpenMetadata container without rebuild
+./deployment/docker-hotdeploy/hot-deploy.sh
+```
+
+### Full Stack with Docker Compose
+```bash
+# Deploy complete OpenMetadata + S3 Connector stack
+cd deployment/docker-hotdeploy/
+docker-compose up -d
+```
+
+### Verify Deployment
+```bash
+# Run comprehensive health check
+./deployment/docker-hotdeploy/health-check.sh
+```
+
+**🐳 Complete Docker Guide**: [🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)
+
+---
+
 ## 🏗️ Production Deployment
 
 ### Deployment Architecture Options
@@ -529,6 +555,7 @@ graph TD
 
 #### 🚀 **Deployment & Operations**
 - **[📋 Deployment Guide](docs/deployment/deployment-guide.md)** - Production deployment scenarios and best practices
+- **[🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)** - Zero-downtime deployment to existing OpenMetadata containers
 
 #### 📚 **Reference Documentation**
 - **[📊 Supported Formats Matrix](docs/reference/supported-formats.md)** - Complete file format support with features and examples
