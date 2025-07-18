@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: s3-connector-config
+  namespace: openmetadata
+  labels:
+    app: s3-connector
+    component: ingestion
+data:
+  # OpenMetadata server configuration
+  openmetadata-server-url: "http://openmetadata-server:8585/api"
+  
+  # S3 connector configuration template
+  ingestion-config.yaml: |
+    source:
+      type: S3
+      serviceName: s3-data-lake
+      serviceConnection:
+        config:
+          type: S3
+          connection:
+            awsRegion: us-east-1
+            endPointURL: null  # Set for MinIO/S3-compatible services
+            bucketName: "${BUCKET_NAME}"
+            securityConfig:
+              protocol: access_key
+              awsAccessKeyId: "${AWS_ACCESS_KEY_ID}"
+              awsSecretAccessKey: "${AWS_SECRET_ACCESS_KEY}"
+            fileFormats:
+              - csv
+              - json
+              - parquet
+              - tsv
+              - orc
+              - avro
+            enablePartitionParsing: true
+            sampleSize: 50
+      sourceConfig:
+        config:
+          type: DatabaseMetadata
+          markDeletedTables: true
+          includeTables: true
+          includeViews: false
+          includeTags: true
+          tableFilterPattern:
+            includes:
+              - ".*"
+            excludes: []
+    sink:
+      type: metadata-rest
+      config:
+        openMetadataServerConfig:
+          hostPort: "${OPENMETADATA_SERVER_URL}"
+          authProvider: no-auth
+    workflowConfig:
+      loggerLevel: INFO
+      openMetadataServerConfig:
+        hostPort: "${OPENMETADATA_SERVER_URL}"
+        authProvider: no-auth
+
+  # Logging configuration
+  logging.conf: |
+    [loggers]
+    keys=root,metadata
+
+    [handlers]
+    keys=consoleHandler
+
+    [formatters]
+    keys=simpleFormatter
+
+    [logger_root]
+    level=INFO
+    handlers=consoleHandler
+
+    [logger_metadata]
+    level=INFO
+    handlers=consoleHandler
+    qualname=metadata
+    propagate=0
+
+    [handler_consoleHandler]
+    class=StreamHandler
+    level=INFO
+    formatter=simpleFormatter
+    args=(sys.stdout,)
+
+    [formatter_simpleFormatter]
+    format=%(asctime)s - %(name)s - %(levelname)s - %(message)s

@@ -1,0 +1,62 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: s3-connector-pdb
+  namespace: openmetadata
+  labels:
+    app: s3-connector
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: s3-connector
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: s3-connector-netpol
+  namespace: openmetadata
+  labels:
+    app: s3-connector
+spec:
+  podSelector:
+    matchLabels:
+      app: s3-connector
+  policyTypes:
+  - Ingress
+  - Egress
+  
+  # Ingress rules - allow traffic from OpenMetadata components
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: openmetadata
+    - podSelector:
+        matchLabels:
+          component: openmetadata-server
+    ports:
+    - protocol: TCP
+      port: 8080
+  
+  # Egress rules - allow necessary outbound traffic
+  egress:
+  # Allow DNS resolution
+  - to: []
+    ports:
+    - protocol: UDP
+      port: 53
+  # Allow HTTPS for S3 API calls
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443
+  # Allow HTTP for OpenMetadata API
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: openmetadata
+    ports:
+    - protocol: TCP
+      port: 8585

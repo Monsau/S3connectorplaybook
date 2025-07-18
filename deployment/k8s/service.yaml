@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: s3-connector-service
+  namespace: openmetadata
+  labels:
+    app: s3-connector
+    component: service
+spec:
+  selector:
+    app: s3-connector
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  type: ClusterIP
+
+---
+# Optional: Service Monitor for Prometheus
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: s3-connector-metrics
+  namespace: openmetadata
+  labels:
+    app: s3-connector
+    component: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: s3-connector
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics

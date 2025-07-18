@@ -1,0 +1,69 @@
+#!/bin/bash
+# Production-ready Dockerfile for S3 Connector
+
+# Build stage - compile and prepare the package
+FROM python:3.10-slim as builder
+
+# Install build dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build
+
+# Copy source files
+COPY requirements.txt setup.py ./
+COPY src/ ./src/
+COPY config/ ./config/
+
+# Build the package
+RUN pip install --no-cache-dir build && \
+    python -m build
+
+# Production stage - minimal runtime image
+FROM openmetadata/openmetadata-ingestion:1.8.0
+
+# Switch to non-root user
+USER airflow
+WORKDIR /app
+
+# Install system dependencies if needed (as root)
+USER root
+RUN apt-get update && apt-get install -y \
+    curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Switch back to airflow user
+USER airflow
+
+# Copy built package and install
+COPY --from=builder --chown=airflow:airflow /build/dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl && \
+    rm -f /tmp/*.whl
+
+# Copy configuration templates
+COPY --chown=airflow:airflow config/ /app/config/
+
+# Set environment variables
+ENV PYTHONPATH="/app:${PYTHONPATH}"
+ENV CONNECTOR_TYPE="s3"
+ENV LOG_LEVEL="INFO"
+
+# Create necessary directories
+RUN mkdir -p /app/logs /app/tmp && \
+    chown -R airflow:airflow /app
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD python -c "import om_s3_connector; print('OK')" || exit 1
+
+# Labels for metadata
+LABEL maintainer="mfonsau@talentys.eu"
+LABEL version="0.9"
+LABEL description="S3/MinIO OpenMetadata Connector"
+LABEL component="data-ingestion"
+
+# Default command
+CMD ["metadata", "ingest", "--help"]
