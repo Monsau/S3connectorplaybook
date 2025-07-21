@@ -27,7 +27,7 @@ print_error() {
 }
 
 # Configuration
-SERVICE_NAME=${1:-"openmetadata-server"}
+SERVICE_NAME=${1:-"openmetadata_server"}
 PACKAGE_NAME="openmetadata-s3-connector"
 
 echo "🔥 Hot-deploying S3 connector to OpenMetadata Docker container..."
@@ -35,11 +35,35 @@ echo "Service: $SERVICE_NAME"
 echo "Package: $PACKAGE_NAME"
 echo ""
 
-# Check if we're in the right directory
+# Check if we're in the right directory and navigate to project root
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+
+print_status "Navigating to project root: $PROJECT_ROOT"
+cd "$PROJECT_ROOT"
+
 if [[ ! -f "setup.py" ]]; then
-    print_error "setup.py not found. Please run this script from the project root."
+    print_error "setup.py not found in $PROJECT_ROOT"
     exit 1
 fi
+
+# Activate virtual environment if it exists
+if [[ -f "venv/bin/activate" ]]; then
+    print_status "Activating virtual environment..."
+    source venv/bin/activate
+    print_success "Virtual environment activated"
+elif [[ -f "activate.sh" ]]; then
+    print_status "Using project activation script..."
+    source activate.sh
+    print_success "Environment activated via activate.sh"
+else
+    print_warning "No virtual environment found. Using system Python."
+fi
+
+# Verify Python and pip
+print_status "Checking Python environment..."
+python --version
+pip --version
 
 # Check if Docker Compose is available
 if ! command -v docker-compose &> /dev/null && ! command -v docker &> /dev/null; then
@@ -61,9 +85,14 @@ else
 fi
 
 # Build the package
-print_status "Building package..."
+print_status "Building package with activated environment..."
 rm -rf dist/ build/ *.egg-info/
-python setup.py sdist bdist_wheel
+
+# Ensure build dependencies are available
+pip install --upgrade pip setuptools wheel build
+
+# Build the package
+python -m build --wheel
 
 if [[ ! -f "dist/openmetadata_s3_connector"-*.whl ]]; then
     print_error "Wheel package not created"
