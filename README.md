@@ -1,4 +1,4 @@
-# 🚀 OpenMetadata S3/MinIO Connector
+#  OpenMetadata S3/MinIO Connector
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
@@ -7,71 +7,71 @@
 
 **Enterprise-grade metadata connector** that seamlessly ingests data catalog information from S3-compatible storage systems into OpenMetadata with comprehensive **RBAC**, **security**, and **governance** features.
 
-## 🎯 Project Status
+##  Project Status
 
 [![Production Ready](https://img.shields.io/badge/status-production%20ready-green.svg)](docs/)
 [![Documentation Complete](https://img.shields.io/badge/docs-100%25%20complete-brightgreen.svg)](docs/)
 [![Security Compliant](https://img.shields.io/badge/security-enterprise%20grade-blue.svg)](docs/reference/security-authentication.md)
 
-**✅ **Production-Ready**: Fully tested, documented, and deployed in enterprise environments  
-**✅ **18+ File Formats**: Complete support for all major data formats with extensible parser architecture  
-**✅ **Enterprise Security**: Comprehensive RBAC, multi-factor authentication, and compliance features  
-**✅ **Manual Ingestion**: Complete UI-bypass workflow with RBAC/IAM/PII compliance support  
-**✅ **Hot Deployment**: Zero-downtime installation into existing OpenMetadata Docker containers  
-**✅ **Security Validation**: Automated RBAC testing and security compliance verification
+** **Production-Ready**: Fully tested, documented, and deployed in enterprise environments  
+** **18+ File Formats**: Complete support for all major data formats with extensible parser architecture  
+** **Enterprise Security**: Comprehensive RBAC, multi-factor authentication, and compliance features  
+** **Manual Ingestion**: Complete UI-bypass workflow with RBAC/IAM/PII compliance support  
+** **Hot Deployment**: Zero-downtime installation into existing OpenMetadata Docker containers  
+** **Security Validation**: Automated RBAC testing and security compliance verification
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
-- [🎯 Overview & Architecture](#-overview--architecture)
-- [✨ Key Features](#-key-features)
-- [🚀 Quick Start (5 Minutes)](#-quick-start-5-minutes)
+- [ Overview & Architecture](#-overview--architecture)
+- [ Key Features](#-key-features)
+- [ Quick Start (5 Minutes)](#-quick-start-5-minutes)
 - [� Manual Ingestion & RBAC](#-manual-ingestion--rbac)
-- [�📚 Step-by-Step Implementation Guide](#-step-by-step-implementation-guide)
-- [🔐 Security & Authentication](#-security--authentication)
-- [🏗️ Production Deployment](#️-production-deployment)
-- [📖 Complete Documentation Index](#-complete-documentation-index)
-- [🧪 Testing & Validation](#-testing--validation)
-- [🤝 Contributing](#-contributing)
+- [� Step-by-Step Implementation Guide](#-step-by-step-implementation-guide)
+- [ Security & Authentication](#-security--authentication)
+- [️ Production Deployment](#️-production-deployment)
+- [ Complete Documentation Index](#-complete-documentation-index)
+- [ Testing & Validation](#-testing--validation)
+- [ Contributing](#-contributing)
 
 ---
 
-## 🎯 Overview & Architecture
+##  Overview & Architecture
 
 ### System Architecture
 
 ```mermaid
 graph TB
-    subgraph "🗄️ Storage Layer"
-        S3[☁️ AWS S3]
-        MinIO[🗂️ MinIO]
-        Compatible[🔗 S3-Compatible Storage]
+    subgraph "️ Storage Layer"
+        S3[️ AWS S3]
+        MinIO[️ MinIO]
+        Compatible[ S3-Compatible Storage]
     end
     
-    subgraph "🔐 Security & Auth"
-        IAM[🎭 IAM Roles]
-        OAuth[🔑 OAuth 2.0]
-        SAML[🏢 SAML SSO]
-        LDAP[📁 LDAP]
-        RBAC[👥 RBAC Engine]
+    subgraph " Security & Auth"
+        IAM[ IAM Roles]
+        OAuth[ OAuth 2.0]
+        SAML[ SAML SSO]
+        LDAP[ LDAP]
+        RBAC[ RBAC Engine]
     end
     
-    subgraph "🧠 S3 Connector Engine"
-        Discovery[🔍 File Discovery]
-        Parsing[🧩 Format Parsing]
-        Schema[📊 Schema Inference]
-        Partitioning[🗃️ Partition Detection]
-        Tagging[🏷️ Auto-Tagging]
-        Governance[⚖️ Data Governance]
+    subgraph " S3 Connector Engine"
+        Discovery[ File Discovery]
+        Parsing[ Format Parsing]
+        Schema[ Schema Inference]
+        Partitioning[️ Partition Detection]
+        Tagging[️ Auto-Tagging]
+        Governance[️ Data Governance]
     end
     
-    subgraph "🏛️ OpenMetadata Platform"
-        API[🔌 Metadata API]
-        Catalog[📚 Data Catalog]
-        Lineage[🔗 Data Lineage]
-        Quality[✅ Data Quality]
-        UI[🖥️ Web Interface]
+    subgraph "️ OpenMetadata Platform"
+        API[ Metadata API]
+        Catalog[ Data Catalog]
+        Lineage[ Data Lineage]
+        Quality[ Data Quality]
+        UI[️ Web Interface]
     end
     
     S3 --> Discovery
@@ -103,25 +103,25 @@ graph TB
     style UI fill:#ff99ff
 ```
 
-**➡️ Detailed Architecture**: [📖 Architecture Overview](docs/developer-guides/architecture.md)
+**️ Detailed Architecture**: [ Architecture Overview](docs/developer-guides/architecture.md)
 
 ---
 
-## ✨ Key Features
+##  Key Features
 
-### 🎯 **Core Capabilities**
+###  **Core Capabilities**
 - **15+ File Formats**: CSV, JSON, Parquet, Avro, ORC, Excel, Delta Lake, HDF5, Pickle, and more
 - **Smart Partitioning**: Automatic Hive-style partition detection and logical table grouping
 - **Real-time Schema Inference**: Dynamic schema detection with data type mapping
 - **Hierarchical Organization**: Multi-level folder structure to table mapping
 
-### 🔐 **Enterprise Security**
+###  **Enterprise Security**
 - **8 Authentication Methods**: JWT, OAuth 2.0, OIDC, SAML, LDAP, IAM Roles, Certificates, Service Mesh
 - **Advanced RBAC**: Team-based, domain-specific, and dynamic role assignment
 - **Compliance Ready**: GDPR, SOX, HIPAA, PCI-DSS compliance frameworks
 - **Zero-Trust Architecture**: mTLS, VPC endpoints, and comprehensive audit trails
 
-### 🏗️ **Production Features**
+### ️ **Production Features**
 - **High Performance**: Parallel processing with configurable worker threads
 - **Scalable Architecture**: Kubernetes-native with IRSA and service mesh support
 - **Enterprise Integration**: API Gateway, cross-account access, federated authentication
@@ -131,17 +131,17 @@ graph TB
 - **Comprehensive Monitoring**: Real-time alerting, behavior analytics, threat detection
 - **Custom Branding**: Dedicated connector icons for professional OpenMetadata integration
 
-### 📊 **Data Governance**
+###  **Data Governance**
 - **Auto-Tagging**: Rule-based tagging for classification and compliance
 - **Data Quality**: Profiling, validation, and quality metrics
 - **Privacy Protection**: PII detection, data masking, and right-to-be-forgotten
 - **Audit & Compliance**: Immutable audit trails and regulatory reporting
 
-**➡️ Complete Feature List**: [📖 Supported Formats Matrix](docs/reference/supported-formats.md)
+**️ Complete Feature List**: [ Supported Formats Matrix](docs/reference/supported-formats.md)
 
 ---
 
-## 🚀 Quick Start (5 Minutes)
+##  Quick Start (5 Minutes)
 
 ### Step 1: Install Dependencies
 ```bash
@@ -193,43 +193,43 @@ metadata ingest -c config/basic-setup.yaml
 ### Step 5: Verify Results
 Visit your OpenMetadata instance at `http://localhost:8585` to see the ingested metadata!
 
-**🎯 For Production**: Use our [Manual Ingestion workflow](#-manual-ingestion--rbac) with RBAC/IAM validation  
-**🐳 For Existing OpenMetadata**: Use [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) for zero-downtime installation
+** For Production**: Use our [Manual Ingestion workflow](#-manual-ingestion--rbac) with RBAC/IAM validation  
+** For Existing OpenMetadata**: Use [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) for zero-downtime installation
 
-**➡️ Complete Installation Guide**: [📖 INSTALLATION.md](INSTALLATION.md) - Comprehensive setup for all scenarios  
-**📋 Installation Checklist**: [✅ INSTALLATION_CHECKLIST.md](INSTALLATION_CHECKLIST.md) - Step-by-step verification guide
+**️ Complete Installation Guide**: [ INSTALLATION.md](INSTALLATION.md) - Comprehensive setup for all scenarios  
+** Installation Checklist**: [ INSTALLATION_CHECKLIST.md](INSTALLATION_CHECKLIST.md) - Step-by-step verification guide
 
-**➡️ Detailed Setup**: [🚀 Quick Start Guide](docs/user-guides/quick-start.md)
+**️ Detailed Setup**: [ Quick Start Guide](docs/user-guides/quick-start.md)
 
 ---
 
-## 🔐 Manual Ingestion & RBAC
+##  Manual Ingestion & RBAC
 
 ### Enterprise-Grade Manual Ingestion Workflow
 
-**🎯 Complete UI-bypass solution** for enterprise environments requiring programmatic control, advanced RBAC, and compliance validation.
+** Complete UI-bypass solution** for enterprise environments requiring programmatic control, advanced RBAC, and compliance validation.
 
 ```mermaid
 graph TB
-    subgraph "🔧 Manual Ingestion Workflow"
-        Config[⚙️ RBAC Configuration] --> Validate[🔍 Security Validation]
-        Validate --> Connect[🔗 S3 Connection Test]
-        Connect --> Ingest[📊 Data Ingestion]
-        Ingest --> Verify[✅ Results Validation]
+    subgraph " Manual Ingestion Workflow"
+        Config[️ RBAC Configuration] --> Validate[ Security Validation]
+        Validate --> Connect[ S3 Connection Test]
+        Connect --> Ingest[ Data Ingestion]
+        Ingest --> Verify[ Results Validation]
     end
     
-    subgraph "🔐 Security Features"
-        IAM[🎭 IAM Role Validation]
-        PII[🛡️ PII Compliance]
-        Audit[📋 Audit Logging]
-        RBAC[👥 Role-Based Access]
+    subgraph " Security Features"
+        IAM[ IAM Role Validation]
+        PII[️ PII Compliance]
+        Audit[ Audit Logging]
+        RBAC[ Role-Based Access]
     end
     
-    subgraph "🎯 Production Scripts"
-        ConnTest[🧪 test-s3-connection.sh]
-        RBACTest[🔒 test-rbac-security.sh]
-        ManualRun[🚀 run-manual-ingestion.sh]
-        HealthCheck[💚 health-check.sh]
+    subgraph " Production Scripts"
+        ConnTest[ test-s3-connection.sh]
+        RBACTest[ test-rbac-security.sh]
+        ManualRun[ run-manual-ingestion.sh]
+        HealthCheck[ health-check.sh]
     end
     
     Config --> IAM
@@ -249,7 +249,7 @@ graph TB
     style Verify fill:#e1f5fe
 ```
 
-### 🚀 Quick Manual Ingestion Setup
+###  Quick Manual Ingestion Setup
 
 #### 1. Configure Environment
 ```bash
@@ -277,7 +277,7 @@ nano config/.env
 ./scripts/run-manual-ingestion.sh config/prod-s3-ingestion-rbac.yaml
 ```
 
-### 🔧 Configuration Templates
+###  Configuration Templates
 
 #### Basic Manual Ingestion (`config/manual-s3-ingestion.yaml`)
 ```yaml
@@ -333,7 +333,7 @@ source:
         timeoutSeconds: 300
 ```
 
-### 🛡️ Security Validation Scripts
+### ️ Security Validation Scripts
 
 #### S3 Connection Testing (`scripts/test-s3-connection.sh`)
 - **Basic connectivity validation**
@@ -355,25 +355,25 @@ source:
 - **Error handling and recovery**
 - **Results verification**
 
-### 📋 Security Compliance Features
+###  Security Compliance Features
 
 | Security Feature | Manual Config | RBAC Config | Description |
 |------------------|---------------|-------------|-------------|
-| **IAM Integration** | Optional | ✅ Required | AWS IAM role validation and STS token management |
-| **PII Detection** | Disabled | ✅ Enabled | Automatic detection and tagging of sensitive data |
-| **Audit Logging** | Basic | ✅ Comprehensive | Immutable audit trails for compliance |
-| **RBAC Validation** | None | ✅ Strict | Role-based access control with dynamic validation |
-| **Cross-Account** | Not supported | ✅ Enabled | Multi-account S3 access with proper IAM chains |
-| **Data Classification** | Manual | ✅ Automatic | Auto-tagging based on content analysis |
+| **IAM Integration** | Optional |  Required | AWS IAM role validation and STS token management |
+| **PII Detection** | Disabled |  Enabled | Automatic detection and tagging of sensitive data |
+| **Audit Logging** | Basic |  Comprehensive | Immutable audit trails for compliance |
+| **RBAC Validation** | None |  Strict | Role-based access control with dynamic validation |
+| **Cross-Account** | Not supported |  Enabled | Multi-account S3 access with proper IAM chains |
+| **Data Classification** | Manual |  Automatic | Auto-tagging based on content analysis |
 
-### 🔗 Complete Manual Ingestion Documentation
+###  Complete Manual Ingestion Documentation
 
-- **📖 [Manual Ingestion Guide](docs/MANUAL_INGESTION.md)** - Complete setup and configuration guide
-- **🔒 [Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation checklist
-- **⚙️ [Configuration Examples](config/)** - Ready-to-use configuration templates
-- **🧪 [Testing Scripts](scripts/)** - Automated validation and testing tools
+- ** [Manual Ingestion Guide](docs/MANUAL_INGESTION.md)** - Complete setup and configuration guide
+- ** [Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation checklist
+- **️ [Configuration Examples](config/)** - Ready-to-use configuration templates
+- ** [Testing Scripts](scripts/)** - Automated validation and testing tools
 
-**🎯 Why Manual Ingestion?**
+** Why Manual Ingestion?**
 - **Enterprise Control**: Programmatic ingestion without UI dependencies
 - **Advanced RBAC**: Complex role hierarchies and permission validation
 - **Compliance Ready**: Built-in PII detection and audit trails
@@ -382,15 +382,15 @@ source:
 
 ---
 
-## 📚 Step-by-Step Implementation Guide
+##  Step-by-Step Implementation Guide
 
 ### Phase 1: Environment Setup (10 minutes)
 
 ```mermaid
 graph LR
-    Install[📦 Install Dependencies] --> Config[⚙️ Basic Configuration]
-    Config --> Test[🧪 Test Connection]
-    Test --> Ready[✅ Ready for Ingestion]
+    Install[ Install Dependencies] --> Config[️ Basic Configuration]
+    Config --> Test[ Test Connection]
+    Test --> Ready[ Ready for Ingestion]
     
     style Install fill:#e8f5e8
     style Config fill:#e3f2fd
@@ -398,31 +398,31 @@ graph LR
     style Ready fill:#e1f5fe
 ```
 
-**📋 Prerequisites**:
+** Prerequisites**:
 - Python 3.8+ with pip
 - Access to S3-compatible storage
 - OpenMetadata instance (local or hosted)
 
-**🔗 Detailed Guide**: [📖 Environment Setup](docs/user-guides/quick-start.md#environment-setup)
+** Detailed Guide**: [ Environment Setup](docs/user-guides/quick-start.md#environment-setup)
 
 ### Phase 2: Security & Authentication (15 minutes)
 
 ```mermaid
 graph TB
     subgraph "Choose Authentication Method"
-        AccessKey[🗝️ Access Key/Secret]
-        IAMRole[👤 IAM Role]
-        IRSA[☁️ IRSA for EKS]
-        Profile[📋 AWS Profile]
+        AccessKey[️ Access Key/Secret]
+        IAMRole[ IAM Role]
+        IRSA[️ IRSA for EKS]
+        Profile[ AWS Profile]
     end
     
     subgraph "OpenMetadata Auth"
-        JWT[🎫 JWT Token]
-        OAuth[🔐 OAuth 2.0]
-        SAML[🎯 SAML SSO]
+        JWT[ JWT Token]
+        OAuth[ OAuth 2.0]
+        SAML[ SAML SSO]
     end
     
-    AccessKey --> RBAC[👥 Configure RBAC]
+    AccessKey --> RBAC[ Configure RBAC]
     IAMRole --> RBAC
     IRSA --> RBAC
     Profile --> RBAC
@@ -431,26 +431,26 @@ graph TB
     OAuth --> RBAC
     SAML --> RBAC
     
-    RBAC --> Secure[🔒 Secure Configuration]
+    RBAC --> Secure[ Secure Configuration]
 ```
 
-**🎯 Authentication Options**:
+** Authentication Options**:
 - **Basic**: Access Key + Secret (development)
 - **Production**: IAM Roles with STS tokens
 - **Kubernetes**: IRSA with service accounts
 - **Enterprise**: OAuth 2.0 + SAML SSO
 
-**🔗 Complete Security Guide**: [🔐 Security & Authentication](docs/reference/security-authentication.md)
+** Complete Security Guide**: [ Security & Authentication](docs/reference/security-authentication.md)
 
 ### Phase 3: Data Source Configuration (20 minutes)
 
 ```mermaid
 flowchart TD
-    Bucket[🪣 Select S3 Bucket] --> Formats[📊 Choose File Formats]
-    Formats --> Partition[🗂️ Configure Partitioning]
-    Partition --> Schema[📋 Schema Settings]
-    Schema --> Quality[✅ Data Quality Rules]
-    Quality --> Deploy[🚀 Deploy Configuration]
+    Bucket[ Select S3 Bucket] --> Formats[ Choose File Formats]
+    Formats --> Partition[️ Configure Partitioning]
+    Partition --> Schema[ Schema Settings]
+    Schema --> Quality[ Data Quality Rules]
+    Quality --> Deploy[ Deploy Configuration]
     
     style Bucket fill:#ffeaa7
     style Formats fill:#74b9ff
@@ -460,58 +460,58 @@ flowchart TD
     style Deploy fill:#e17055
 ```
 
-**📊 Supported Formats** (15+ types):
+** Supported Formats** (15+ types):
 - **Structured**: CSV, TSV, JSON, JSONL
 - **Analytics**: Parquet, Avro, ORC, Delta Lake
 - **Office**: Excel (XLS/XLSX)
 - **Scientific**: HDF5, Feather, Pickle
 
-**🔗 Format Configuration**: [📊 Supported Formats Matrix](docs/reference/supported-formats.md)
+** Format Configuration**: [ Supported Formats Matrix](docs/reference/supported-formats.md)
 
 ### Phase 4: Advanced Features (30 minutes)
 
 ```mermaid
 graph TD
-    Basic[⚙️ Basic Setup] --> Advanced{Advanced Features?}
+    Basic[️ Basic Setup] --> Advanced{Advanced Features?}
     
-    Advanced -->|Yes| Partitions[🗂️ Hive Partitioning]
-    Advanced -->|Yes| Tags[🏷️ Auto-Tagging]
-    Advanced -->|Yes| Quality[📊 Data Quality]
-    Advanced -->|Yes| Governance[⚖️ Data Governance]
+    Advanced -->|Yes| Partitions[️ Hive Partitioning]
+    Advanced -->|Yes| Tags[️ Auto-Tagging]
+    Advanced -->|Yes| Quality[ Data Quality]
+    Advanced -->|Yes| Governance[️ Data Governance]
     
-    Partitions --> Production[🏭 Production Ready]
+    Partitions --> Production[ Production Ready]
     Tags --> Production
     Quality --> Production
     Governance --> Production
     
-    Advanced -->|No| SimpleIngestion[🚀 Simple Ingestion]
-    SimpleIngestion --> Validate[✅ Validate Results]
+    Advanced -->|No| SimpleIngestion[ Simple Ingestion]
+    SimpleIngestion --> Validate[ Validate Results]
 ```
 
-**🔧 Advanced Configuration Examples**:
+** Advanced Configuration Examples**:
 
 | Feature | Configuration | Documentation |
 |---------|---------------|---------------|
-| **Hive Partitioning** | `enable_partition_parsing: true` | [🗂️ Hierarchical Folders](docs/reference/hierarchical-folders.md) |
-| **Auto-Tagging** | `auto_tag_rules: classification` | [🏷️ Tagging Guide](docs/user-guides/configuration.md#auto-tagging) |
-| **Data Quality** | `enable_profiling: true` | [📊 Quality Rules](docs/user-guides/configuration.md#data-quality) |
-| **Schema Evolution** | `track_schema_changes: true` | [🔄 Schema Management](docs/user-guides/configuration.md#schema-evolution) |
+| **Hive Partitioning** | `enable_partition_parsing: true` | [️ Hierarchical Folders](docs/reference/hierarchical-folders.md) |
+| **Auto-Tagging** | `auto_tag_rules: classification` | [️ Tagging Guide](docs/user-guides/configuration.md#auto-tagging) |
+| **Data Quality** | `enable_profiling: true` | [ Quality Rules](docs/user-guides/configuration.md#data-quality) |
+| **Schema Evolution** | `track_schema_changes: true` | [ Schema Management](docs/user-guides/configuration.md#schema-evolution) |
 
 ### Phase 5: Production Deployment (45 minutes)
 
 ```mermaid
 graph TB
-    Dev[🧪 Development] --> Staging[🎭 Staging Environment]
-    Staging --> Security[🔐 Security Hardening]
-    Security --> Scale[📈 Scaling Configuration]
-    Scale --> Monitor[📊 Monitoring Setup]
-    Monitor --> Production[🏭 Production Deployment]
+    Dev[ Development] --> Staging[ Staging Environment]
+    Staging --> Security[ Security Hardening]
+    Security --> Scale[ Scaling Configuration]
+    Scale --> Monitor[ Monitoring Setup]
+    Monitor --> Production[ Production Deployment]
     
     subgraph "Production Features"
-        HA[🔄 High Availability]
-        LB[⚖️ Load Balancing]
-        Backup[💾 Backup Strategy]
-        Audit[📋 Audit Logging]
+        HA[ High Availability]
+        LB[️ Load Balancing]
+        Backup[ Backup Strategy]
+        Audit[ Audit Logging]
     end
     
     Production --> HA
@@ -520,46 +520,46 @@ graph TB
     Production --> Audit
 ```
 
-**🏗️ Deployment Options**:
+**️ Deployment Options**:
 - **Docker**: Single-container deployment
 - **Kubernetes**: Scalable orchestration with RBAC
 - **Airflow**: Scheduled workflow automation
 - **Enterprise**: Multi-region with disaster recovery
 
-**🔗 Production Guide**: [🚀 Deployment Guide](docs/deployment/deployment-guide.md)
+** Production Guide**: [ Deployment Guide](docs/deployment/deployment-guide.md)
 
 ---
 
-## 🔐 Security & Authentication
+##  Security & Authentication
 
 ### Comprehensive Security Framework
 
 ```mermaid
 graph TB
-    subgraph "🛡️ Multi-Layer Security"
-        Network[🌐 Network Security]
-        Auth[🔐 Authentication]
-        AuthZ[👥 Authorization]
-        Audit[📋 Audit & Compliance]
+    subgraph "️ Multi-Layer Security"
+        Network[ Network Security]
+        Auth[ Authentication]
+        AuthZ[ Authorization]
+        Audit[ Audit & Compliance]
     end
     
-    subgraph "🔑 Authentication Methods"
-        IAM[🎭 IAM Roles]
-        OAuth[🔐 OAuth 2.0]
-        SAML[🏢 SAML SSO]
-        JWT[🎫 JWT Tokens]
-        mTLS[🔒 Mutual TLS]
-        OIDC[🌐 OpenID Connect]
-        LDAP[📁 LDAP Integration]
-        Certificate[📜 Certificate Auth]
+    subgraph " Authentication Methods"
+        IAM[ IAM Roles]
+        OAuth[ OAuth 2.0]
+        SAML[ SAML SSO]
+        JWT[ JWT Tokens]
+        mTLS[ Mutual TLS]
+        OIDC[ OpenID Connect]
+        LDAP[ LDAP Integration]
+        Certificate[ Certificate Auth]
     end
     
-    subgraph "👥 RBAC Framework"
-        DataSteward[👨‍💼 Data Steward]
-        DataAnalyst[📊 Data Analyst]
-        DataEngineer[⚙️ Data Engineer]
-        Admin[👑 System Admin]
-        Viewer[👁️ Read-Only Viewer]
+    subgraph " RBAC Framework"
+        DataSteward[‍ Data Steward]
+        DataAnalyst[ Data Analyst]
+        DataEngineer[️ Data Engineer]
+        Admin[ System Admin]
+        Viewer[️ Read-Only Viewer]
     end
     
     Auth --> AuthZ
@@ -581,11 +581,11 @@ graph TB
 | **Production** | IRSA + OAuth | Dynamic RBAC | Enterprise |
 | **Compliance** | SAML + mTLS | Audit-ready | Regulated industries |
 
-**🔗 Complete Security Guide**: [🔐 Security & Authentication](docs/reference/security-authentication.md)
+** Complete Security Guide**: [ Security & Authentication](docs/reference/security-authentication.md)
 
 ---
 
-## 🐳 **Quick Docker Deployment**
+##  **Quick Docker Deployment**
 
 ### One-Command Hot Deploy (Existing Container)
 ```bash
@@ -623,40 +623,40 @@ docker-compose up -d
 ./scripts/test-rbac-security.sh
 ```
 
-**🐳 Complete Docker Guide**: [🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)  
-**🔐 Manual Ingestion Guide**: [📖 Manual Ingestion](docs/MANUAL_INGESTION.md)
+** Complete Docker Guide**: [ Docker Hot Deploy](deployment/docker-hotdeploy/README.md)  
+** Manual Ingestion Guide**: [ Manual Ingestion](docs/MANUAL_INGESTION.md)
 
 ---
 
-## 🏗️ Production Deployment
+## ️ Production Deployment
 
 ### Deployment Architecture Options
 
 ```mermaid
 graph TD
-    subgraph "☁️ Cloud Native"
-        EKS[🚀 Amazon EKS]
-        GKE[🏗️ Google GKE]
-        AKS[💙 Azure AKS]
+    subgraph "️ Cloud Native"
+        EKS[ Amazon EKS]
+        GKE[️ Google GKE]
+        AKS[ Azure AKS]
     end
     
-    subgraph "🐳 Containerized"
-        Docker[🐋 Docker Compose]
-        Swarm[🔄 Docker Swarm]
-        Podman[📦 Podman]
+    subgraph " Containerized"
+        Docker[ Docker Compose]
+        Swarm[ Docker Swarm]
+        Podman[ Podman]
     end
     
-    subgraph "🔄 Orchestration"
-        Airflow[🌪️ Apache Airflow]
-        Luigi[🍄 Luigi Pipeline]
-        Prefect[🌊 Prefect]
+    subgraph " Orchestration"
+        Airflow[️ Apache Airflow]
+        Luigi[ Luigi Pipeline]
+        Prefect[ Prefect]
     end
     
-    subgraph "📊 Monitoring"
-        Prometheus[📈 Prometheus]
-        Grafana[📊 Grafana]
-        CloudWatch[☁️ CloudWatch]
-        Datadog[🐕 Datadog]
+    subgraph " Monitoring"
+        Prometheus[ Prometheus]
+        Grafana[ Grafana]
+        CloudWatch[️ CloudWatch]
+        Datadog[ Datadog]
     end
     
     EKS --> Airflow
@@ -738,49 +738,49 @@ workflowConfig:
     enableComplianceValidation: true
 ```
 
-**🔗 Production Deployment**: [🚀 Deployment Guide](docs/deployment/deployment-guide.md)
+** Production Deployment**: [ Deployment Guide](docs/deployment/deployment-guide.md)
 
 ---
 
-## 📖 Complete Documentation Index
+##  Complete Documentation Index
 
-### 🎯 **By User Type**
+###  **By User Type**
 
 | User Profile | Primary Resources | Advanced Topics |
 |--------------|-------------------|-----------------|
-| **👨‍💻 Data Engineers** | [Quick Start](docs/user-guides/quick-start.md) • [Manual Ingestion](docs/MANUAL_INGESTION.md) | [Architecture](docs/developer-guides/architecture.md) • [Production](docs/deployment/deployment-guide.md) |
-| **👨‍💼 Data Stewards** | [Security Guide](docs/reference/security-authentication.md) • [RBAC Setup](docs/MANUAL_INGESTION.md#rbac-configuration) | [Security Checklist](docs/SECURITY_CHECKLIST.md) • [Compliance](docs/reference/security-authentication.md#compliance-frameworks) |
-| **📊 Data Analysts** | [Supported Formats](docs/reference/supported-formats.md) • [Manual Workflows](docs/MANUAL_INGESTION.md) | [Hierarchical Data](docs/reference/hierarchical-folders.md) • [Data Quality](docs/user-guides/configuration.md#data-quality) |
-| **🔧 DevOps Engineers** | [Hot Deploy](deployment/docker-hotdeploy/) • [Security Scripts](scripts/) | [Kubernetes](docs/deployment/deployment-guide.md#kubernetes-deployment) • [Monitoring](docs/deployment/deployment-guide.md#monitoring-alerting) |
-| **👩‍💻 Developers** | [Adding Formats](docs/developer-guides/adding-formats.md) • [Architecture](docs/developer-guides/architecture.md) | [API Reference](docs/reference/) • [Contributing](docs/developer-guides/adding-formats.md#contributing) |
+| **‍ Data Engineers** | [Quick Start](docs/user-guides/quick-start.md) • [Manual Ingestion](docs/MANUAL_INGESTION.md) | [Architecture](docs/developer-guides/architecture.md) • [Production](docs/deployment/deployment-guide.md) |
+| **‍ Data Stewards** | [Security Guide](docs/reference/security-authentication.md) • [RBAC Setup](docs/MANUAL_INGESTION.md#rbac-configuration) | [Security Checklist](docs/SECURITY_CHECKLIST.md) • [Compliance](docs/reference/security-authentication.md#compliance-frameworks) |
+| ** Data Analysts** | [Supported Formats](docs/reference/supported-formats.md) • [Manual Workflows](docs/MANUAL_INGESTION.md) | [Hierarchical Data](docs/reference/hierarchical-folders.md) • [Data Quality](docs/user-guides/configuration.md#data-quality) |
+| ** DevOps Engineers** | [Hot Deploy](deployment/docker-hotdeploy/) • [Security Scripts](scripts/) | [Kubernetes](docs/deployment/deployment-guide.md#kubernetes-deployment) • [Monitoring](docs/deployment/deployment-guide.md#monitoring-alerting) |
+| **‍ Developers** | [Adding Formats](docs/developer-guides/adding-formats.md) • [Architecture](docs/developer-guides/architecture.md) | [API Reference](docs/reference/) • [Contributing](docs/developer-guides/adding-formats.md#contributing) |
 
-### 📚 **Documentation Structure**
+###  **Documentation Structure**
 
 ```mermaid
 graph TD
-    Root[📄 Main README] --> UserGuides[📖 User Guides]
-    Root --> DevGuides[👨‍💻 Developer Guides]
-    Root --> Deploy[🚀 Deployment]
-    Root --> Reference[📚 Reference]
-    Root --> History[📜 Project History]
+    Root[ Main README] --> UserGuides[ User Guides]
+    Root --> DevGuides[‍ Developer Guides]
+    Root --> Deploy[ Deployment]
+    Root --> Reference[ Reference]
+    Root --> History[ Project History]
     
-    UserGuides --> QuickStart[🚀 Quick Start]
-    UserGuides --> Comprehensive[📚 Comprehensive Guide]
-    UserGuides --> Configuration[⚙️ Configuration]
-    UserGuides --> Troubleshooting[🔧 Troubleshooting]
+    UserGuides --> QuickStart[ Quick Start]
+    UserGuides --> Comprehensive[ Comprehensive Guide]
+    UserGuides --> Configuration[️ Configuration]
+    UserGuides --> Troubleshooting[ Troubleshooting]
     
-    DevGuides --> Architecture[🏗️ Architecture]
-    DevGuides --> AddingFormats[➕ Adding Formats]
+    DevGuides --> Architecture[️ Architecture]
+    DevGuides --> AddingFormats[ Adding Formats]
     
-    Deploy --> DeploymentGuide[📋 Deployment Guide]
+    Deploy --> DeploymentGuide[ Deployment Guide]
     
-    Reference --> SupportedFormats[📊 Supported Formats]
-    Reference --> Security[🔐 Security & Auth]
-    Reference --> Hierarchical[🗂️ Hierarchical Folders]
-    Reference --> MermaidDiagrams[🧩 Mermaid Diagrams]
+    Reference --> SupportedFormats[ Supported Formats]
+    Reference --> Security[ Security & Auth]
+    Reference --> Hierarchical[️ Hierarchical Folders]
+    Reference --> MermaidDiagrams[ Mermaid Diagrams]
     
-    History --> ProjectEvolution[🔄 Project Evolution]
-    History --> RestructurePlans[📝 Restructure Plans]
+    History --> ProjectEvolution[ Project Evolution]
+    History --> RestructurePlans[ Restructure Plans]
     
     style Root fill:#ffebcd
     style UserGuides fill:#e6f3ff
@@ -790,67 +790,67 @@ graph TD
     style History fill:#ffe6f0
 ```
 
-### 🔗 **Quick Navigation**
+###  **Quick Navigation**
 
-#### 📖 **User Documentation**
-- **[🚀 Quick Start Guide](docs/user-guides/quick-start.md)** - Get started in 5 minutes
+####  **User Documentation**
+- **[ Quick Start Guide](docs/user-guides/quick-start.md)** - Get started in 5 minutes
 - **[� Manual Ingestion Guide](docs/MANUAL_INGESTION.md)** - Complete UI-bypass workflow with RBAC/IAM
-- **[🔒 Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation and compliance
-- **[�📚 Comprehensive Guide](docs/user-guides/comprehensive-guide.md)** - Complete implementation walkthrough
-- **[⚙️ Configuration Guide](docs/user-guides/configuration.md)** - Detailed configuration options and examples
-- **[🎨 Icon Integration](docs/user-guides/icon-integration.md)** - Custom connector icons for OpenMetadata
-- **[🔧 Troubleshooting](docs/user-guides/troubleshooting.md)** - Common issues and solutions
+- **[ Security Checklist](docs/SECURITY_CHECKLIST.md)** - Production security validation and compliance
+- **[� Comprehensive Guide](docs/user-guides/comprehensive-guide.md)** - Complete implementation walkthrough
+- **[️ Configuration Guide](docs/user-guides/configuration.md)** - Detailed configuration options and examples
+- **[ Icon Integration](docs/user-guides/icon-integration.md)** - Custom connector icons for OpenMetadata
+- **[ Troubleshooting](docs/user-guides/troubleshooting.md)** - Common issues and solutions
 
-#### 👨‍💻 **Developer Resources**
-- **[🏗️ Architecture Overview](docs/developer-guides/architecture.md)** - System design and component architecture
-- **[➕ Adding File Formats](docs/developer-guides/adding-formats.md)** - Extend format support and parser development
+#### ‍ **Developer Resources**
+- **[️ Architecture Overview](docs/developer-guides/architecture.md)** - System design and component architecture
+- **[ Adding File Formats](docs/developer-guides/adding-formats.md)** - Extend format support and parser development
 
-#### 🚀 **Deployment & Operations**
-- **[📋 Deployment Guide](docs/deployment/deployment-guide.md)** - Production deployment scenarios and best practices
-- **[🐳 Docker Hot Deploy](deployment/docker-hotdeploy/README.md)** - Zero-downtime deployment to existing OpenMetadata containers
-- **[🔧 Manual Ingestion Scripts](scripts/)** - Automated RBAC/IAM validation and manual ingestion workflows
-- **[⚙️ Configuration Templates](config/)** - Production-ready configuration examples with RBAC
+####  **Deployment & Operations**
+- **[ Deployment Guide](docs/deployment/deployment-guide.md)** - Production deployment scenarios and best practices
+- **[ Docker Hot Deploy](deployment/docker-hotdeploy/README.md)** - Zero-downtime deployment to existing OpenMetadata containers
+- **[ Manual Ingestion Scripts](scripts/)** - Automated RBAC/IAM validation and manual ingestion workflows
+- **[️ Configuration Templates](config/)** - Production-ready configuration examples with RBAC
 
-#### 📚 **Reference Documentation**
-- **[📊 Supported Formats Matrix](docs/reference/supported-formats.md)** - Complete file format support with features and examples
-- **[🔐 Security & Authentication](docs/reference/security-authentication.md)** - Comprehensive security, authentication, and RBAC guide
-- **[🗂️ Hierarchical Folders](docs/reference/hierarchical-folders.md)** - Advanced partitioning and folder structure mapping
-- **[🧩 Mermaid Diagrams](docs/reference/mermaid-diagrams.md)** - Catalog of all project diagrams and their usage
+####  **Reference Documentation**
+- **[ Supported Formats Matrix](docs/reference/supported-formats.md)** - Complete file format support with features and examples
+- **[ Security & Authentication](docs/reference/security-authentication.md)** - Comprehensive security, authentication, and RBAC guide
+- **[️ Hierarchical Folders](docs/reference/hierarchical-folders.md)** - Advanced partitioning and folder structure mapping
+- **[ Mermaid Diagrams](docs/reference/mermaid-diagrams.md)** - Catalog of all project diagrams and their usage
 
-#### 📜 **Project Information**
-- **[🔄 Project Evolution](docs/project-history/project-evolution.md)** - Development history and feature timeline
-- **[📝 Documentation Index](docs/README.md)** - Complete documentation navigation and structure
+####  **Project Information**
+- **[ Project Evolution](docs/project-history/project-evolution.md)** - Development history and feature timeline
+- **[ Documentation Index](docs/README.md)** - Complete documentation navigation and structure
 
 ---
 
-## 🧪 Testing & Validation
+##  Testing & Validation
 
 ### Test Coverage Overview
 
 ```mermaid
 graph TD
-    subgraph "🧪 Test Categories"
-        Unit[⚗️ Unit Tests]
-        Integration[🔗 Integration Tests]
-        E2E[🌐 End-to-End Tests]
-        Performance[⚡ Performance Tests]
-        Security[🔐 Security Tests]
+    subgraph " Test Categories"
+        Unit[️ Unit Tests]
+        Integration[ Integration Tests]
+        E2E[ End-to-End Tests]
+        Performance[ Performance Tests]
+        Security[ Security Tests]
     end
     
-    subgraph "📊 Format Testing"
-        CSV[📄 CSV Parser]
-        JSON[📋 JSON Parser]
-        Parquet[📊 Parquet Parser]
-        Avro[🗃️ Avro Parser]
+    subgraph " Format Testing"
+        CSV[ CSV Parser]
+        JSON[ JSON Parser]
+        Parquet[ Parquet Parser]
+        Avro[️ Avro Parser]
         Delta[Δ Delta Lake]
-        More[➕ 10+ More Formats]
+        More[ 10+ More Formats]
     end
     
-    subgraph "🔒 Security Testing"
-        AuthTest[🔑 Authentication]
-        RBACTest[👥 RBAC Validation]
-        SSLTest[🔒 SSL/TLS]
-        ComplianceTest[⚖️ Compliance]
+    subgraph " Security Testing"
+        AuthTest[ Authentication]
+        RBACTest[ RBAC Validation]
+        SSLTest[ SSL/TLS]
+        ComplianceTest[️ Compliance]
     end
     
     Unit --> CSV
@@ -931,30 +931,30 @@ test:
 
 | Test Type | Script | Description | Coverage |
 |-----------|--------|-------------|----------|
-| **Basic Connectivity** | `test-s3-connection.sh` | S3 access, credentials, bucket permissions | ✅ SSL, IAM, Cross-account |
-| **RBAC Validation** | `test-rbac-security.sh` | Role-based access control, IAM policies | ✅ Dynamic roles, Permission boundaries |
-| **Manual Ingestion** | `run-manual-ingestion.sh` | Full UI-bypass workflow testing | ✅ RBAC, PII detection, Audit trails |
-| **Hot Deployment** | `health-check.sh` | Package integration verification | ✅ Container health, Import validation |
-| **Compliance** | Built into RBAC script | GDPR, SOX, HIPAA validation | ✅ Data classification, Audit logs |
+| **Basic Connectivity** | `test-s3-connection.sh` | S3 access, credentials, bucket permissions |  SSL, IAM, Cross-account |
+| **RBAC Validation** | `test-rbac-security.sh` | Role-based access control, IAM policies |  Dynamic roles, Permission boundaries |
+| **Manual Ingestion** | `run-manual-ingestion.sh` | Full UI-bypass workflow testing |  RBAC, PII detection, Audit trails |
+| **Hot Deployment** | `health-check.sh` | Package integration verification |  Container health, Import validation |
+| **Compliance** | Built into RBAC script | GDPR, SOX, HIPAA validation |  Data classification, Audit logs |
 
-**🔗 Testing Documentation**: [🧪 Testing Guide](docs/user-guides/testing.md)
+** Testing Documentation**: [ Testing Guide](docs/user-guides/testing.md)
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 ### Development Workflow
 
 ```mermaid
 graph LR
-    Fork[🍴 Fork Repository] --> Clone[📥 Clone Locally]
-    Clone --> Branch[🌿 Create Feature Branch]
-    Branch --> Develop[💻 Develop Feature]
-    Develop --> Test[🧪 Run Tests]
-    Test --> Document[📝 Update Documentation]
-    Document --> PR[📤 Create Pull Request]
-    PR --> Review[👀 Code Review]
-    Review --> Merge[🔀 Merge to Main]
+    Fork[ Fork Repository] --> Clone[ Clone Locally]
+    Clone --> Branch[ Create Feature Branch]
+    Branch --> Develop[ Develop Feature]
+    Develop --> Test[ Run Tests]
+    Test --> Document[ Update Documentation]
+    Document --> PR[ Create Pull Request]
+    PR --> Review[ Code Review]
+    Review --> Merge[ Merge to Main]
     
     style Fork fill:#e8f5e8
     style Test fill:#fff3e0
@@ -964,30 +964,30 @@ graph LR
 
 ### Contribution Guidelines
 
-1. **🍴 Fork the Repository**
+1. ** Fork the Repository**
    ```bash
    git clone https://github.com/yourusername/S3connectorplaybook.git
    cd S3connectorplaybook
    ```
 
-2. **🌿 Create Feature Branch**
+2. ** Create Feature Branch**
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-3. **💻 Develop & Test**
+3. ** Develop & Test**
    ```bash
    pip install -r requirements.txt
    pip install -e .
    python -m pytest tests/
    ```
 
-4. **📝 Update Documentation**
+4. ** Update Documentation**
    - Update relevant markdown files in `docs/`
    - Add examples and configuration snippets
    - Update Mermaid diagrams if needed
 
-5. **📤 Submit Pull Request**
+5. ** Submit Pull Request**
    - Write clear commit messages
    - Include tests for new features
    - Update documentation
@@ -1000,11 +1000,11 @@ graph LR
 - **Testing**: Maintain >90% test coverage
 - **Security**: Follow secure coding practices
 
-**🔗 Detailed Contributing Guide**: [🤝 Contributing Guidelines](docs/developer-guides/contributing.md)
+** Detailed Contributing Guide**: [ Contributing Guidelines](docs/developer-guides/contributing.md)
 
 ---
 
-## 📄 License
+##  License
 
 **MIT License** - see [LICENSE](LICENSE) file for details.
 
@@ -1012,31 +1012,31 @@ This project is open source and welcomes contributions from the community. Feel 
 
 ---
 
-## 📞 Support & Contact
+##  Support & Contact
 
 ### 🆘 Getting Help
 
-1. **📖 Documentation**: Check our [comprehensive documentation](docs/)
-2. **🔧 Troubleshooting**: Visit our [troubleshooting guide](docs/user-guides/troubleshooting.md)
-3. **💬 Issues**: Create an issue on GitHub for bugs or feature requests
-4. **📧 Email**: Contact the maintainer at [mfonsau@talentys.eu](mailto:mfonsau@talentys.eu)
+1. ** Documentation**: Check our [comprehensive documentation](docs/)
+2. ** Troubleshooting**: Visit our [troubleshooting guide](docs/user-guides/troubleshooting.md)
+3. ** Issues**: Create an issue on GitHub for bugs or feature requests
+4. ** Email**: Contact the maintainer at [mfonsau@talentys.eu](mailto:mfonsau@talentys.eu)
 
-### 🏆 Project Maintainer
+###  Project Maintainer
 
 **Mustapha Fonsau**  
-📧 [mfonsau@talentys.eu](mailto:mfonsau@talentys.eu)  
-🐙 [GitHub Profile](https://github.com/Monsau)  
+ [mfonsau@talentys.eu](mailto:mfonsau@talentys.eu)  
+ [GitHub Profile](https://github.com/Monsau)  
 
-### 🌟 Acknowledgments
+###  Acknowledgments
 
 This project builds upon the excellent OpenMetadata framework and integrates with the broader data ecosystem. Special thanks to the OpenMetadata community and all contributors who have helped improve this connector.
 
 ---
 
-*🚀 **Ready to get started?** Jump to our [Quick Start Guide](docs/user-guides/quick-start.md) and have your S3 data ingested into OpenMetadata in under 5 minutes!*
+* **Ready to get started?** Jump to our [Quick Start Guide](docs/user-guides/quick-start.md) and have your S3 data ingested into OpenMetadata in under 5 minutes!*
 
-*🔐 **Need enterprise-grade RBAC?** Check out our [Manual Ingestion Guide](docs/MANUAL_INGESTION.md) for complete UI-bypass workflows with advanced security validation!*
+* **Need enterprise-grade RBAC?** Check out our [Manual Ingestion Guide](docs/MANUAL_INGESTION.md) for complete UI-bypass workflows with advanced security validation!*
 
-*🐳 **Already have OpenMetadata running?** Use our [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) script for zero-downtime installation!*
+* **Already have OpenMetadata running?** Use our [Hot Deploy](deployment/docker-hotdeploy/hot-deploy.sh) script for zero-downtime installation!*
 
-*📋 **Want step-by-step guidance?** Follow our [Installation Checklist](INSTALLATION_CHECKLIST.md) to ensure every step is completed successfully!*
+* **Want step-by-step guidance?** Follow our [Installation Checklist](INSTALLATION_CHECKLIST.md) to ensure every step is completed successfully!*
